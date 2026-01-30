@@ -1,0 +1,31 @@
+using System;
+using System.Runtime.InteropServices;
+using System.Threading;
+
+class Program
+{
+    // Import Windows API
+    [DllImport("user32.dll")]
+    static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, IntPtr dwExtraInfo);
+
+    // Mouse event constants
+    const uint MOUSEEVENTF_LEFTDOWN = 0x02;
+    const uint MOUSEEVENTF_LEFTUP   = 0x04;
+
+    static void Main()
+    {
+        Console.WriteLine("Mouse auto-click started...");
+        Console.WriteLine("Clicking every 10 seconds at current cursor position.");
+        Console.WriteLine("Press Ctrl + C to stop.");
+
+        while (true)
+        {
+            Thread.Sleep(10000); // 10 seconds delay
+
+            mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, IntPtr.Zero);
+            mouse_event(MOUSEEVENTF_LEFTUP,   0, 0, 0, IntPtr.Zero);
+
+            Console.WriteLine($"Clicked at {DateTime.Now}");
+        }
+    }
+}
