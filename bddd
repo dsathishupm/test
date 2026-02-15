@@ -429,3 +429,12 @@ Cucumber Tag Expressions — Detailed Cheat Sheet
 | OR + NOT  | `(@a or @b) and not @c` | Combines groups but removes unwanted ones           | Regression minus failures          | Large suite filtering           |
 
 
+✅ What is Glue in Cucumber
+
+Glue = Location of Step Definition Classes
+
+It tells Cucumber:
+
+“Where should I search for Java methods that match Gherkin steps?”
+
+
