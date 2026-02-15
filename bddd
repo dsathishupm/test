@@ -1,0 +1,431 @@
+✅ PERFECT STRUCTURE (EASY TO UNDERSTAND)
+                ┌─────────────────────┐
+                │   Maven / Jenkins    │
+                │   mvn clean verify   │
+                └─────────┬───────────┘
+                          ↓
+                ┌─────────────────────┐
+                │     Runner Class     │
+                │   JUnit / Cucumber   │
+                └─────────┬───────────┘
+                          ↓
+                ┌─────────────────────┐
+                │    Feature Files     │
+                │     Gherkin Steps    │
+                └─────────┬───────────┘
+                          ↓
+                ┌─────────────────────┐
+                │   Step Definitions   │
+                └─────────┬───────────┘
+                          ↓
+                     Actor Created
+                          ↓
+        ┌────────────────────────────────┐
+        │           SCREENPLAY            │
+        │                                │
+        │  Actor                         │
+        │    ↓ has abilities             │
+        │  Abilities                     │
+        │    ↓ performs                  │
+        │  Tasks                         │
+        │    ↓ uses                      │
+        │  Interactions                  │
+        │    ↓ talks to                  │
+        │  System Under Test             │
+        │    ↓ returns                   │
+        │  Questions (Validation)        │
+        └────────────────────────────────┘
+                          ↓
+                ┌─────────────────────┐
+                │   Serenity Reports   │
+                │   target/site        │
+                └─────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                    BUSINESS LAYER                            │
+└─────────────────────────────────────────────────────────────┘
+
+   Feature Files (Gherkin)
+   src/test/resources/features/
+
+   Example:
+   -------------------------------------------------
+   Scenario: Login success
+     Given user opens application
+     When user logs in
+     Then dashboard should be displayed
+   -------------------------------------------------
+
+                          │
+                          ▼
+
+┌─────────────────────────────────────────────────────────────┐
+│                    GLUE LAYER                               │
+│               Step Definitions                              │
+│           src/test/java/stepDefinitions                     │
+└─────────────────────────────────────────────────────────────┘
+
+Example:
+
+@When("user logs in")
+public void login() {
+    actor.attemptsTo(Login.withCredentials("user","pass"));
+}
+
+                          │
+                          ▼
+
+┌─────────────────────────────────────────────────────────────┐
+│                    SCREENPLAY CORE                          │
+└─────────────────────────────────────────────────────────────┘
+
+                ┌──────────────────────┐
+                │        ACTOR         │
+                │   "User"             │
+                └─────────┬────────────┘
+                          │ has abilities
+                          ▼
+
+                ┌──────────────────────┐
+                │      ABILITIES       │
+                │ src/test/java/abilities
+                │                      │
+                │ BrowseTheWeb         │
+                │ CallAPI              │
+                │ UseDatabase          │
+                └─────────┬────────────┘
+                          │ enables
+                          ▼
+
+                ┌──────────────────────┐
+                │        TASKS         │
+                │ src/test/java/tasks  │
+                │ Business Actions     │
+                │ Login                │
+                │ MakePayment          │
+                └─────────┬────────────┘
+                          │ made up of
+                          ▼
+
+                ┌──────────────────────┐
+                │     INTERACTIONS     │
+                │ src/test/java/interactions
+                │ Low level actions    │
+                │ Click                │
+                │ Enter                │
+                │ WaitUntil            │
+                └─────────┬────────────┘
+                          │ performs
+                          ▼
+
+┌─────────────────────────────────────────────────────────────┐
+│                    SYSTEM UNDER TEST                        │
+│                  (UI / API / DB / Services)                 │
+└─────────────────────────────────────────────────────────────┘
+
+                          ▲
+                          │ asks
+                          │
+                ┌──────────────────────┐
+                │      QUESTIONS       │
+                │ src/test/java/questions
+                │ Validation layer     │
+                │ DashboardVisible     │
+                │ AccountBalance       │
+                └──────────────────────┘
+
+Actor.should(seeThat(...))
+
+
+
+
+⚙️ EXECUTION FLOW (TECHNICAL)
+
+Developer runs command
+        │
+        ▼
+mvn clean verify
+        │
+        ▼
+Maven Lifecycle
+        │
+        ▼
+Serenity Maven Plugin
+        │
+        ▼
+JUnit Platform Runner
+        │
+        ▼
+Cucumber Engine
+        │
+        ▼
+Feature Files Execution
+        │
+        ▼
+Step Definitions
+        │
+        ▼
+Screenplay Pattern Execution
+        │
+        ▼
+Application Automation
+        │
+        ▼
+Results Captured by Serenity
+        │
+        ▼
+Serenity Reports Generated
+target/site/serenity/
+
+
+
+FULL END-TO-END FLOW (ONE LINE MEMORY)
+Feature → StepDef → Actor → Ability → Task → Interaction → System → Question → Report
+
+
+✅ Serenity Screenplay — REAL EXECUTION FLOW (Step-by-Step)
+Maven Command
+     ↓
+Runner Class (JUnit/Cucumber)
+     ↓
+Feature File (Gherkin)
+     ↓
+Step Definition
+     ↓
+Actor Created
+     ↓
+Actor gets Abilities
+     ↓
+Actor Performs Tasks
+     ↓
+Tasks use Interactions
+     ↓
+System Under Test (UI/API/DB)
+     ↓
+Actor Asks Questions (Validation)
+     ↓
+Serenity Reports Generated
+
+✅ SIMPLE HUMAN ANALOGY
+
+Actor = User
+Task = Business Action (Login, Transfer Money)
+Interaction = Click, Type, API Call
+Ability = Browser / API capability
+Question = Verification
+
+Example:
+
+Ram logs into banking app and checks balance
+Flow:
+
+Ram (Actor)
+   can BrowseTheWeb (Ability)
+   performs Login (Task)
+      uses Enter + Click (Interactions)
+   asks BalanceVisible (Question)
+
+
+
+✅ PERFECT STRUCTURE (EASY TO UNDERSTAND)
+                ┌─────────────────────┐
+                │   Maven / Jenkins    │
+                │   mvn clean verify   │
+                └─────────┬───────────┘
+                          ↓
+                ┌─────────────────────┐
+                │     Runner Class     │
+                │   JUnit / Cucumber   │
+                └─────────┬───────────┘
+                          ↓
+                ┌─────────────────────┐
+                │    Feature Files     │
+                │     Gherkin Steps    │
+                └─────────┬───────────┘
+                          ↓
+                ┌─────────────────────┐
+                │   Step Definitions   │
+                └─────────┬───────────┘
+                          ↓
+                     Actor Created
+                          ↓
+        ┌────────────────────────────────┐
+        │           SCREENPLAY            │
+        │                                │
+        │  Actor                         │
+        │    ↓ has abilities             │
+        │  Abilities                     │
+        │    ↓ performs                  │
+        │  Tasks                         │
+        │    ↓ uses                      │
+        │  Interactions                  │
+        │    ↓ talks to                  │
+        │  System Under Test             │
+        │    ↓ returns                   │
+        │  Questions (Validation)        │
+        └────────────────────────────────┘
+                          ↓
+                ┌─────────────────────┐
+                │   Serenity Reports   │
+                │   target/site        │
+                └─────────────────────┘
+✅ WHY SCREENPLAY IS POWERFUL
+Instead of:
+
+Step → Page → Selenium
+
+
+You get:
+
+Actor → Task → Interaction
+
+
+
+⭐ Important Concept (Interview Level)
+
+Serenity does NOT limit you.
+
+Anything Actor needs → create Ability.
+
+Actor can have multiple abilities:
+
+actor.can(BrowseTheWeb.with(driver));
+actor.can(CallAnApi.at(baseUrl));
+actor.can(UseDatabase.with(connection));
+actor.can(UseToken.with(token));
+actor.can(UseSSH.with(sshClient));
+
+
+
+1. Built-in Abilities Provided by Serenity (Official)
+
+These come from Serenity Screenplay libraries.
+
+✅ Web UI Ability
+BrowseTheWeb
+
+Used for Selenium / Playwright style UI automation.
+
+actor.can(BrowseTheWeb.with(driver));
+
+
+Provides:
+
+WebDriver access
+
+Page interaction
+
+Element lookup
+
+Wait handling
+
+✅ REST API Ability
+CallAnApi
+actor.can(CallAnApi.at("https://api.test.com"));
+
+
+Provides:
+
+REST client
+
+Base URL handling
+
+Request execution
+
+✅ Mobile Abilities (Appium)
+
+If using mobile automation:
+
+UseAnAndroidDevice
+UseIOSDevice
+✅ Serenity Core Ability Interface
+
+All abilities implement:
+
+net.serenitybdd.screenplay.Ability
+
+
+This is the base contract.
+
+3. Special Serenity Helper Access Pattern
+
+Inside Tasks you often see:
+
+BrowseTheWeb.as(actor).getDriver();
+
+
+or
+
+CallAnApi.as(actor).getRestClient();
+
+
+This retrieves the ability from the actor.
+
+
+4. Hidden Abilities (Indirect)
+
+Serenity internally uses some capabilities but you rarely touch them:
+
+TakeScreenshots
+
+ManageSession
+
+EventBus integration
+
+WebDriverFacade
+
+These are framework internals.
+
+
+
+7. Ability vs Utility (Important)
+Ability	Utility
+Has state	Stateless
+Actor owns it	Global
+External system	Helper logic
+Example: DB connection	Example: Date formatter
+
+
+
+9. Quick Complete List
+Serenity Native
+
+BrowseTheWeb
+
+CallAnApi
+
+UseAnAndroidDevice
+
+UseIOSDevice
+
+
+6️⃣ Example Wrapper Pattern (Advanced)
+public class BrowsingTheWeb implements Ability {
+
+    private BrowseTheWeb browseTheWeb;
+
+    private BrowsingTheWeb(WebDriver driver) {
+        this.browseTheWeb = BrowseTheWeb.with(driver);
+    }
+
+    public static BrowsingTheWeb with(WebDriver driver) {
+        return new BrowsingTheWeb(driver);
+    }
+
+    public WebDriver getDriver() {
+        return browseTheWeb.getDriver();
+    }
+}
+
+
+Cucumber Tag Expressions — Detailed Cheat Sheet 
+
+| Condition | Expression              | Description                                         | When to Use                        | Example Scenario Result         |
+| --------- | ----------------------- | --------------------------------------------------- | ---------------------------------- | ------------------------------- |
+| AND       | `@a and @b`             | Runs scenarios that contain **both tags together**  | When you want very specific subset | Only scenarios having both tags |
+| OR        | `@a or @b`              | Runs scenarios that contain **any one of the tags** | When combining multiple groups     | Scenarios with either tag       |
+| NOT       | `not @a`                | Excludes scenarios that contain the tag             | Skip unstable / WIP tests          | Everything except that tag      |
+| AND + NOT | `@a and not @b`         | Runs scenarios with one tag but excludes another    | Smoke without slow tests           | Specific include + exclude      |
+| OR + NOT  | `(@a or @b) and not @c` | Combines groups but removes unwanted ones           | Regression minus failures          | Large suite filtering           |
+
+
