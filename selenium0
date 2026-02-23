@@ -1,0 +1,313 @@
+Perfect! Here's your complete beginner-friendly guide — from zero to a working AI agent that reads your Excel backlog and sends Gherkin scenarios to Teams.
+
+🗺️ Big Picture First
+You upload Excel (Backlog)
+        ↓
+Power Automate reads it
+        ↓
+Copilot Studio Agent understands test objectives
++ learns from your Bitbucket feature files
+        ↓
+Generates Gherkin scenarios
+        ↓
+Sends to Microsoft Teams message
+
+PART 1 — Setup Prerequisites
+What you need before starting:
+
+Microsoft 365 account (with Teams access)
+Access to Copilot Studio → go to copilotstudio.microsoft.com
+Access to Power Automate → go to make.powerautomate.com
+Your Bitbucket .feature files (download a few as .txt or .feature)
+Your Excel backlog file ready
+
+
+PART 2 — Create Your Copilot Studio Agent
+Step 1 — Open Copilot Studio
+
+Go to copilotstudio.microsoft.com
+Sign in with your Microsoft 365 account
+Click "Create" on the left sidebar
+Click "New Agent"
+
+
+Step 2 — Name & Describe Your Agent
+
+Name: BDD Gherkin Generator
+Description: Reads test objectives and generates Gherkin scenarios based on Serenity BDD framework
+Click "Create"
+
+
+Step 3 — Add Instructions (System Prompt)
+This is the brain of your agent. After creating:
+
+Click "Settings" (top right gear icon)
+Click "Agent Instructions"
+Paste this exactly:
+
+You are a Senior Test Automation Expert specializing in Serenity BDD framework.
+
+When a user gives you a test objective or user story, you must:
+1. Analyze the objective carefully
+2. Generate Gherkin scenarios using Given / When / Then / And format
+3. Follow BDD best practices
+4. Use clear, business-readable language
+5. Generate at least 2-3 scenarios per objective (Happy path, Negative path, Edge case)
+6. Add tags like @smoke @regression @functional based on context
+7. Flag any NEW step definitions that would need to be created
+8. Format output cleanly so it can be copy-pasted into a .feature file
+
+Always follow the naming conventions and patterns from the existing feature files provided in your knowledge base.
+
+Click Save
+
+
+Step 4 — Upload Your Serenity Feature Files as Knowledge
+This teaches the agent YOUR project's style and patterns.
+
+In your agent, click "Knowledge" on the left menu
+Click "Add Knowledge"
+Select "Files"
+Upload your .feature files from Bitbucket (download them first locally)
+
+Upload 5–10 of your best existing feature files
+Also upload a plain text file listing your existing step definitions
+
+
+Click "Add" and wait for indexing to finish (2–3 minutes)
+
+
+💡 Tip: The more feature files you upload, the better the agent copies your exact style.
+
+
+Step 5 — Test Your Agent in Studio
+
+On the right side panel you'll see a "Test your agent" chat box
+Type: Generate Gherkin scenarios for: User should be able to login with valid credentials
+See if it generates proper Gherkin
+Refine your instructions in Step 3 if output doesn't look right
+
+
+Step 6 — Publish Your Agent
+
+Click "Publish" button (top right)
+Click "Publish" again to confirm
+Wait 1–2 minutes — your agent is now live ✅
+
+
+PART 3 — Create Power Automate Flow
+This flow will: Read Excel → Send to Agent → Post result to Teams
+Step 1 — Open Power Automate
+
+Go to make.powerautomate.com
+Click "Create" on left sidebar
+Click "Automated cloud flow"
+Name it: Backlog to Gherkin Teams Flow
+
+
+Step 2 — Set the Trigger
+
+Search for trigger: "When a file is created" → choose OneDrive for Business
+Set the folder to where you'll upload your Excel backlog
+
+Example folder: /BDD Backlog
+
+
+Click "New Step"
+
+
+💡 Tip: Save your Excel backlog to OneDrive, not your local PC.
+
+
+Step 3 — Read Excel Rows
+
+Search action: "List rows present in a table" → choose Excel Online (Business)
+Fill in:
+
+Location: OneDrive for Business
+Document Library: OneDrive
+File: Select your Excel file
+Table: Select your table name (your Excel must have a formatted Table — press Ctrl+T in Excel)
+
+
+Click "New Step"
+
+
+Step 4 — Loop Through Each Row
+
+Search action: "Apply to each"
+In the "Select an output" field, click and select "value" from the Excel step
+Inside the loop, click "Add an action"
+
+
+Step 5 — Call Your Copilot Studio Agent
+
+Search action: "Microsoft Copilot Studio" → select "Ask a question" or "Generate text with agent"
+Connect to your agent BDD Gherkin Generator
+In the message/question field, type:
+
+Generate Gherkin BDD scenarios for this test objective:
+[click Dynamic Content → select your "Test Objective" column from Excel]
+
+Click "New Step"
+
+
+Step 6 — Post Result to Microsoft Teams
+
+Search action: "Microsoft Teams" → select "Post a message in a chat or channel"
+Fill in:
+
+Post as: Flow bot
+Post in: Channel
+Team: Select your team
+Channel: Select your channel (e.g., #bdd-scenarios)
+Message:
+
+
+
+🤖 New Gherkin Scenario Generated!
+
+📋 Test Objective: [Dynamic Content → Test Objective column]
+
+✅ Generated Scenario:
+[Dynamic Content → Agent Response/Output]
+
+---
+
+Click Save ✅
+
+
+Step 7 — Test the Flow
+
+Click "Test" (top right)
+Select "Manually"
+Upload a sample Excel to your OneDrive /BDD Backlog folder
+Watch it run — check your Teams channel for the message!
+
+
+PART 4 — Prepare Your Excel Backlog
+Your Excel must be formatted as a Table with these columns:
+Test IDTest ObjectiveModulePriorityTC001User should login with valid credentialsLoginHighTC002User should see error on wrong passwordLoginMedium
+
+To make it a Table: Select all data → Press Ctrl + T → Check "My table has headers" → OK
+
+
+PART 5 — How to Use It Daily
+1. Open your Excel backlog
+2. Add new test objectives as rows
+3. Save file to OneDrive /BDD Backlog folder
+4. Flow triggers automatically
+5. Open Microsoft Teams → your channel
+6. See Gherkin scenarios posted! ✅
+7. Copy them into your Bitbucket .feature files
+
+🚨 Common Beginner Mistakes to Avoid
+MistakeFixExcel not formatted as TablePress Ctrl+T to convertAgent gives generic outputUpload more feature files to KnowledgeFlow doesn't triggerMake sure file is saved in correct OneDrive folderAgent not connected in flowRe-publish agent after any changesTeams message not postingCheck Flow bot has permission to post in that channel
+
+✅ Summary Checklist
+
+ Copilot Studio agent created with instructions
+ Feature files uploaded as Knowledge
+ Agent published
+ Excel backlog formatted as Table and saved to OneDrive
+ Power Automate flow created and tested
+ Teams channel receiving messages
+
+
+Want me to write you the exact Excel template, the full optimized system prompt, or help you troubleshoot any specific step?here the backlog upload is one time activity, if i have new changes then i will upload else use already available one7:37 PMGreat point! So the flow should be smart enough to:
+
+✅ Use existing Excel if no new upload
+✅ Use new Excel if user uploads a fresh one
+
+Let me redesign the approach for this.
+
+Revised Architecture
+Option A: User uploads NEW Excel to OneDrive
+              ↓
+         Flow detects new file → processes it
+
+Option B: User triggers flow MANUALLY (no new file)
+              ↓
+         Flow picks EXISTING Excel from OneDrive → processes it
+Both paths → Agent generates Gherkin → Posts to Teams
+
+The Fix — Use ONE Fixed File Location
+Instead of triggering on "new file uploaded", we change the approach to:
+Golden Rule:
+
+Always read from one fixed Excel file in OneDrive. When you have updates, just replace/overwrite that same file. The flow reads whatever is currently there.
+
+
+Revised Power Automate Flow Design
+Step 1 — Change the Trigger
+Remove the "When a file is created" trigger.
+Replace with: Manually trigger a flow OR When a message is posted in Teams (so you or your team can trigger it on demand)
+Best option for you → Teams trigger:
+
+Search trigger: "When a keyword is mentioned" → Teams
+Or simpler: Use "Manually trigger a flow" with a button
+
+
+Step 2 — Always Read from Fixed File Path
+In the "List rows present in a table" Excel step:
+
+File: Hardcode the path to your ONE fixed Excel file
+
+Example: /BDD Backlog/MyBacklog.xlsx
+
+
+This means — every time flow runs, it reads whatever rows exist in that file at that moment
+
+
+Step 3 — Track Already Processed Rows (So it doesn't re-generate old scenarios)
+This is the smart part. You don't want it re-generating Gherkin for rows it already processed.
+Add a "Status" column in your Excel:
+Test IDTest ObjectiveModulePriorityStatusTC001Login with valid credentialsLoginHighDone ✅TC002Invalid password errorLoginMedium
+In Power Automate — add a Condition inside the loop:
+
+Inside "Apply to each" loop, add "Condition" action
+Set condition: Status is not equal to Done
+If Yes (empty status): → Call agent → Post to Teams → Update Excel row Status to "Done"
+If No (already Done): → Do nothing (skip)
+
+This way:
+
+New rows (blank Status) → get processed ✅
+Old rows (Status = Done) → skipped ✅
+
+
+Step 4 — Update Row After Processing
+After posting to Teams, add:
+
+Search action: "Update a row" → Excel Online (Business)
+Point to same file and table
+Set Key Column: Test ID
+Set Key Value: Current row's Test ID
+Set Status column → type Done
+
+
+Updated Daily Usage
+When you have NEW backlog items:
+  → Open your fixed Excel (MyBacklog.xlsx) in OneDrive
+  → Add new rows (leave Status column BLANK)
+  → Save file
+  → Trigger the flow manually or via Teams
+
+When you have NO changes:
+  → Do nothing — old rows are already marked Done
+  → Flow will skip them automatically
+
+When you want to RE-GENERATE a scenario:
+  → Clear the "Status" cell for that row
+  → Trigger flow again
+
+Updated Excel Template
+Test IDTest ObjectiveModulePriorityStatusTC001User logs in with valid credentialsLoginHighDoneTC002User sees error on wrong passwordLoginMediumTC003New story here...CheckoutHigh
+
+Only rows with blank Status will be processed each run. Simple and clean.
+
+
+Trigger Options — Pick One
+Trigger OptionBest ForManual button in Power AutomateYou run it yourself when readyPost a keyword in Teams e.g. !generateTeam can trigger from Teams chatScheduled e.g. every Monday 9amFully automatic weekly run
+
+Want me to help you set up the "Status" column update step in Power Automate in detail, or set up the Teams keyword trigger so your whole team can trigger it from chat?
