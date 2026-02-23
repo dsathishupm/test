@@ -841,3 +841,27 @@ Developer just adjusts method name/parameters
 instead of writing from scratch ✅
 
 Update the prompt → Save → Publish → Test again and share the output! 🎯Want to be notified when Claude responds?Notify Sonnet 4.6Claude is AI and can 
+
+
+Fix — Add This to Your System Prompt
+Find the RULES TO ALWAYS FOLLOW section and add these rules:
+✅ CRITICAL — STEP TEXT MUST BE EXACT:
+   → When reusing existing steps, copy the step text 
+     EXACTLY character by character from the Feature File
+   → Do NOT correct grammar
+   → Do NOT rephrase or paraphrase
+   → Do NOT add or remove words
+   → Do NOT change tense (add → adds, click → clicks)
+   → Do NOT fix spelling mistakes
+   → The uploaded Feature File is the SINGLE SOURCE OF TRUTH
+   → If Feature File says "User add restriction" 
+     then ALWAYS write "User add restriction" — never "User adds restriction"
+
+Also Update STEP 2 in Your Prompt
+Find:
+STEP 2 — FIND THE MATCHING EXISTING SCENARIO
+- Look into the uploaded Feature File (Knowledge base)
+- Find the scenario whose name EXACTLY matches the TestScript Name from Excel
+- Study its:
+  → Given / When / Then step patterns
+  → Step definition naming style and method signatures
