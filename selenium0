@@ -719,3 +719,125 @@ RULES TO ALWAYS FOLLOW:
 ✅ Use business-readable language (non-technical)
 ✅ Always output BOTH Section 1 (feature file) and Section 2 (step definitions)
 ✅ If TestScript Name not found in Feature File — say "No matching scenari
+
+
+
+
+Got it! The issue is the system prompt is not instructing the agent strongly enough to read your uploaded Java file and generate partial implementation.
+Here is the exact section to update in your system prompt:
+
+Find This Section and Replace
+Find:
+STEP 6 — GENERATE STEP DEFINITIONS FOR NEW STEPS ONLY
+- For every NEW step that does NOT exist in the Step Definitions file:
+  → Generate the Java step definition method
+  → Follow the EXACT same coding style, annotations, and structure
+    as the existing step definitions in the uploaded file
+  → Use same import packages as existing file
+  → Use same Serenity annotations (@Step, @Steps, etc.)
+  → Place in the correct StepDefinition class based on module/feature
+  → Add a comment // NEW — needs implementation
+Replace With:
+STEP 6 — GENERATE STEP DEFINITIONS FOR NEW STEPS ONLY
+- For every NEW step that does NOT exist in the Step Definitions file:
+
+  → MANDATORY: Open and READ the uploaded Java Step Definition file 
+    from Knowledge Base BEFORE writing any code
+    
+  → COPY the EXACT same:
+     • Import statements from top of the Java file
+     • Class structure and class name pattern
+     • Annotation style (@Given @When @Then)
+     • @Steps injection pattern (e.g. MySteps steps;)
+     • Internal method call pattern (e.g. steps.doSomething())
+     • Method naming convention (camelCase, verb first)
+     • Any Serenity specific calls (@Step, Serenity.recordReportData())
+     
+  → Generate PARTIAL implementation like this:
+     • Keep the @Given/@When/@Then annotation with exact step text
+     • Inject the same @Steps class already used in existing file
+     • Call the MOST RELEVANT existing method from Steps class
+       that is closest to this new step's action
+     • Add comment // TODO: adjust parameters if needed
+     • NEVER leave method body completely empty
+
+  → Example of PARTIAL implementation to follow:
+  
+     // Existing pattern found in your Java file:
+     @Given("the user is on the login page")
+     public void userIsOnLoginPage() {
+         loginSteps.navigateToLoginPage();
+     }
+     
+     // New step partial implementation should follow same pattern:
+     @Given("the user is on the partial debit page")
+     public void userIsOnPartialDebitPage() {
+         // TODO: adjust method name if needed
+         paymentSteps.navigateToPartialDebitPage();
+     }
+     
+  → If NO closely related method exists in Steps class:
+     • Still inject the relevant @Steps class
+     • Call a placeholder with correct naming convention
+     • Add // TODO: implement in [StepClassName].java
+     • NEVER leave body empty — always add at least the Steps call
+
+Also Update the Output Format Section
+Find:
+⚠️ NEW STEP DEFINITIONS (needs implementation):
+
+  // NEW — needs implementation
+  @Given("[new step text]")
+  public void [methodName]() {
+      // TODO: implement step
+  }
+Replace With:
+⚠️ NEW STEP DEFINITIONS (partial implementation based on your Java file):
+
+  // NEW — partial implementation
+  // TODO: adjust method calls if needed
+  @Given("[new step text]")
+  public void [methodName]() {
+      [relevantStepsClass].[closestExistingMethod]();
+      // TODO: adjust parameters if needed
+  }
+
+  // NEW — partial implementation  
+  @When("[new step text]")
+  public void [methodName]() {
+      [relevantStepsClass].[closestExistingMethod]();
+      // TODO: adjust parameters if needed
+  }
+
+  // NEW — partial implementation
+  @Then("[new step text]")
+  public void [methodName]() {
+      [relevantStepsClass].[closestExistingMethod]();
+      // TODO: adjust parameters if needed
+  }
+
+Also Add This to RULES Section
+Add these 3 new rules at the bottom of your rules:
+✅ NEVER generate empty method bodies for new step definitions
+✅ ALWAYS read uploaded Java file and copy its exact coding pattern
+✅ ALWAYS generate partial implementation using closest existing 
+   method from the uploaded Steps class as reference
+
+Why This Will Now Work
+Before:
+Agent found new step → wrote empty body ❌
+
+After:
+Agent found new step
+      ↓
+Reads your uploaded Java file from Knowledge
+      ↓
+Finds closest existing method pattern
+      ↓
+Generates partial implementation
+following YOUR exact coding style ✅
+      ↓
+Developer just adjusts method name/parameters
+instead of writing from scratch ✅
+
+Update the prompt → Save → Publish → Test again and share the output! 🎯Want to be notified when Claude responds?Notify Sonnet 4.6Claude is AI and can 
