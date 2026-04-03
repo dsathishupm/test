@@ -1,0 +1,2737 @@
+Question	Short Answer
+Why String is immutable in Java?	For security (used in class loading), thread safety (multiple threads can safely share a String), and performance (caching in the String pool).
+A String object is immutable because, once it is created, its content cannot be changed. Any operation that appears to modify a String (like concatenation or substring()) actually creates a brand-new String object.
+What is static in Java?	The member (variable or method) belongs to the class, not to an object/instance. It is loaded only once when the class is loaded.
+What is final in Java?	A keyword to make a variable a constant, a method unable to be overridden, or a class unable to be inherited.
+What is Autoboxing and unboxing?	Autoboxing is the automatic conversion of a primitive type to its corresponding wrapper class (e.g., int to Integer). Unboxing is the reverse.
+public class AutoboxingDemo {
+    public static void main(String[] args) {
+        int primitiveInt = 50; 
+        
+        // Autoboxing occurs here:
+        // The Java compiler automatically converts 'primitiveInt' (int) 
+        // into an 'Integer' object and assigns it to 'wrapperInt'.
+        Integer wrapperInt = primitiveInt; 
+        
+        System.out.println("Primitive int value: " + primitiveInt);
+        System.out.println("Wrapper Integer object (after Autoboxing): " + wrapperInt);
+
+        // This is often seen when adding primitives to Collections, which only store objects:
+        java.util.List<Integer> numbers = new java.util.ArrayList<>();
+        numbers.add(100); // Autoboxing: 100 (int) -> new Integer(100)
+        
+        System.out.println("Collection element (100) was autoboxed: " + numbers.get(0));
+    }
+}
+
+What is serialization and deserialization?	Serialization is converting an object's state into a byte stream. Deserialization is reconstructing the object from the byte stream. Used for storage or transmission.
+What is an abstract modifier?	Used for classes that cannot be instantiated and for methods that have no body and must be implemented by non-abstract subclasses.
+What is call by reference and call by value?	Call by Value passes a copy of the primitive value. Call by Reference passes the memory address (reference) of an object. Java is strictly Call by Value (for primitives) or Call by Value (for object references).
+String is primitive or non-primitive?	Non-primitive (it is a Class: java.lang.String).
+What is the difference between a checked and unchecked exception?
+ &
+Exceptions	Checked exceptions (e.g., IOException) must be handled (using try-catch or throws) at compile time. Unchecked exceptions (e.g., RuntimeException, NullPointerException) do not need to be explicitly handled.
+ 
+
+Creating user defined exceptions:
+class InsufficientFundsException extends Exception {
+    public InsufficientFundsException(String message) {
+        super(message); // Pass the message to the parent Exception class
+    }
+}
+
+// Step 2: Use it in a method
+class BankAccount {
+    private double balance = 100.0;
+
+    public void withdraw(double amount) throws InsufficientFundsException {
+        if (amount > balance) {
+            // Step 3: Explicitly throw the exception
+            throw new InsufficientFundsException("Balance too low: " + balance);
+        }
+        balance -= amount;
+    }
+}
+
+throw: Used to explicitly throw a single exception. We use throw when something goes wrong (or “shouldn’t happen”) and we want to stop normal flow and hand control to exception handling.
+class Demo {
+    static void checkAge(int age) {
+        
+        if (age < 18) {
+            throw new ArithmeticException("Age must be 18 or above");
+        }
+    }
+
+    public static void main(String[] args) {
+        
+        checkAge(15);
+    }
+}
+2. throws: Declares exceptions that a method might throw, informing the caller to handle them. It is mainly used with checked exceptions (explained below). If a method calls another method that throws a checked exception, and it doesn’t catch it, it must declare that exception in its throws clause
+import java.io.*;
+
+class Demo {
+    static void readFile(String fileName) throws IOException {
+        
+        FileReader file = new FileReader(fileName);
+    }
+
+    public static void main(String[] args){
+        
+        try {
+            readFile("test.txt");
+        } catch (IOException e){
+            
+            System.out.println("File not found: " + e.getMessage());
+        }
+    }
+}
+
+
+Difference between final, finally, finalize?	final: keyword to restrict. finally: code block that always executes after try-catch. finalize(): method called by Garbage Collector before destroying an object.
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class FinallyDemo {
+
+    public static void main(String[] args) {
+        
+        // --- Scenario 1: No Exception Occurs ---
+        System.out.println("--- Scenario 1: No Exception ---");
+        performOperation(10, 5);
+        
+        // --- Scenario 2: Exception Occurs and is Caught ---
+        System.out.println("\n--- Scenario 2: Exception is Caught ---");
+        performOperation(10, 0); 
+
+        // --- Scenario 3: Exception Occurs and is NOT Caught ---
+        // We demonstrate this conceptually, as an uncaught runtime exception would stop the program.
+        // A simple example like division by zero is shown here, though typically 
+        // finally is used for Checked Exceptions like IO.
+        System.out.println("\n--- Scenario 3: Exception is Uncaught (or propagated) ---");
+        try {
+            // Simulating an unexpected exception type (e.g., NullPointerException)
+            String s = null;
+            s.length(); 
+        } catch (ArithmeticException e) {
+            System.out.println("CATCH: Caught only ArithmeticException."); 
+        } finally {
+            // This runs even though NullPointerException wasn't explicitly caught.
+            System.out.println("FINALLY: Cleanup task completed (runs even if exception not caught).");
+        }
+    }
+
+    public static void performOperation(int num1, int num2) {
+        FileWriter writer = null;
+        try {
+            System.out.println("TRY: Attempting operation...");
+            
+            // This line throws an ArithmeticException if num2 is 0
+            int result = num1 / num2; 
+            System.out.println("TRY: Result = " + result); 
+            
+            // Simulating another action that needs cleanup
+            writer = new FileWriter(new File("output.txt"));
+            writer.write("Operation successful.");
+            
+        } catch (ArithmeticException e) {
+            // This block executes ONLY if ArithmeticException is thrown
+            System.err.println("CATCH: Error caught: Division by zero is not allowed.");
+            
+        } catch (IOException e) {
+            // Handles potential file writing errors
+            System.err.println("CATCH: File writing error.");
+            
+        } finally {
+            // This block ALWAYS executes
+            System.out.println("FINALLY: Closing resources (always executes).");
+            if (writer != null) {
+                try {
+                    writer.close();
+                    // NOTE: You must have a nested try-catch here for the close() operation
+                } catch (IOException e) {
+                    System.err.println("FINALLY Error: Failed to close writer.");
+                }
+            }
+        }
+    }
+}
+
+Final keyword:
+•	Final Variables: A variable declared final becomes a constant, meaning its value cannot be changed or reassigned after it is initialized. For reference variables (objects or arrays), the reference itself cannot be changed to point to a new object, but the internal state of the object/array can still be modified (unless the object itself is immutable, like String).
+o	Example: final int MAX_VALUE = 100;
+When applied to a variable, final means the variable's value cannot be changed after it is initialized. 
+•	Primitive Types (e.g., int, boolean): The stored value is a constant. Once initialized, the int variable x will always hold that exact number.
+•	Object References (Non-primitive types, e.g., String, ArrayList): The reference to the object is constant, meaning it will always point to the same memory location (the same object instance).
+o	The object's state can still be modified if the object is mutable. For example, a final ArrayList can have elements added or removed, but the variable cannot be reassigned to a different ArrayList object.
+o	For an object to be truly immutable, its class must be designed carefully (like the built-in String class) with all its fields also being final and immutable. 
+
+
+      import java.util.ArrayList;
+import java.util.List;
+
+public class MutableObjectReferenceExample {
+    public static void main(String[] args) {
+        // The reference 'finalList' is constant. It points to one specific ArrayList object.
+        final List<String> finalList = new ArrayList<>();
+
+        // The object's state can be modified because ArrayList is mutable:
+        finalList.add("Apple"); // This is allowed
+        finalList.add("Banana"); // This is allowed
+        System.out.println("After adding elements: " + finalList); // Output: After adding elements: [Apple, Banana]
+
+        // Modifying an element is also allowed:
+        finalList.set(0, "Apricot");
+        System.out.println("After setting an element: " + finalList); // Output: After setting an element: [Apricot, Banana]
+
+        // Removing elements is allowed:
+        finalList.remove("Banana");
+        System.out.println("After removing an element: " + finalList); // Output: After removing an element: [Apricot]
+
+        // This would cause a compilation error:
+        // finalList = new ArrayList<>(); // Error: Cannot assign a value to final variable 'finalList'
+    }
+}
+
+public class ImmutableObjectReferenceExample {
+    public static void main(String[] args) {
+        // The reference 'finalString' is constant. It points to the String "Hello".
+        final String finalString = "Hello";
+
+        // This line creates a NEW String object "Hello World" in memory.
+        // It does not change the original "Hello" object.
+        // The result is not assigned back to 'finalString', so it's a lost operation.
+        finalString.concat(" World");
+
+        System.out.println("Original String: " + finalString); // Output: Original String: Hello (Still "Hello")
+
+        // This would cause a compilation error if we tried to reassign it:
+        // finalString = "Goodbye"; // Error: Cannot assign a value to final variable 'finalString'
+    }
+}
+
+•	Final Methods: A method declared final cannot be overridden by any subclasses. This ensures that the method's behavior remains consistent throughout the inheritance hierarchy, which is useful for maintaining critical or secure logic.
+o	Example: public final void display() { ... }
+•	Final Classes: A class declared final cannot be extended or inherited by any other class. This prevents any other class from altering its design or behavior through subclassing. System classes such as java.lang.String and java.lang.Math are examples of final classes.
+o	Example: public final class FinalClass { ... } 
+Difference between abstract and interface?	Abstract Class can have concrete methods, constructors, and instance variables. Interface can only have abstract methods (after Java 8: static/default methods) and static final constants. A class can implement multiple interfaces but extend only one abstract class.
+Difference between String Builder and String Buffer?	StringBuffer is synchronized (thread-safe) and slower. StringBuilder is non-synchronized (not thread-safe) and faster. Use StringBuilder in single-threaded environments.
+public class MutableStringDemo {
+
+    public static void main(String[] args) {
+        // 1. StringBuilder: Faster, Non-Synchronized (Best for single-threaded tasks)
+        System.out.println("--- 1. StringBuilder Demo (Faster) ---");
+        
+        StringBuilder sb = new StringBuilder("Initial");
+        System.out.println("Initial StringBuilder: " + sb);
+
+        // Mutable operation: The original object is modified, no new object is created.
+        sb.append(" Content"); 
+        sb.insert(0, "New ");
+        sb.reverse();
+        
+        System.out.println("Modified StringBuilder: " + sb);
+        
+        // 2. StringBuffer: Slower, Synchronized (Required for multi-threaded tasks)
+        System.out.println("\n--- 2. StringBuffer Demo (Thread-Safe) ---");
+
+        StringBuffer sbuf = new StringBuffer("Start");
+        System.out.println("Initial StringBuffer: " + sbuf);
+
+        // Mutable operations are synchronized internally
+        sbuf.append(" Data"); 
+        sbuf.delete(0, 5); // Deletes "Start"
+        sbuf.insert(0, "Fresh");
+        
+        System.out.println("Modified StringBuffer: " + sbuf);
+        
+        // 3. Performance Test (Conceptual Difference)
+        // Note: Running a formal benchmark is complex, but this illustrates the difference in large loops.
+        
+        long startTime = System.nanoTime();
+        performAppends(new StringBuilder());
+        long endTime = System.nanoTime();
+        System.out.println("\nStringBuilder time (ms): " + (endTime - startTime) / 1000000.0);
+
+        startTime = System.nanoTime();
+        performAppends(new StringBuffer());
+        endTime = System.nanoTime();
+        System.out.println("StringBuffer time (ms): " + (endTime - startTime) / 1000000.0);
+    }
+
+    /** Helper method to run many appends for performance comparison */
+    private static void performAppends(Appendable mutableString) {
+        for (int i = 0; i < 50000; i++) {
+            if (mutableString instanceof StringBuilder) {
+                ((StringBuilder) mutableString).append("a");
+            } else if (mutableString instanceof StringBuffer) {
+                ((StringBuffer) mutableString).append("a");
+            }
+        }
+    }
+}
+
+
+How to define dynamic array?	Use the ArrayList class from the Collections Framework, as its size changes dynamically.
+Can we create the object for the abstract classes?	No, they must be inherited by a concrete class which is then instantiated.
+Can we create the object for an interface?	No, they must be implemented by a concrete class which is then instantiated.
+Can we create a constructor of an abstract class?	Yes. It is used to initialize the state of the abstract class variables via a call from the subclass's constructor (super()).
+Can a constructor be overloaded? Explain why?	Yes. Constructors can be overloaded to provide multiple ways to initialize an object (different parameters).
+Can main method be overloaded?	Yes. By changing its signature (parameters), but the JVM will only execute the original public static void main(String[] args) method.
+Can main method be overridden?	No. The main method is static, and static methods cannot be overridden (only hidden).
+Can we override static method?	No (only hidden).
+Can we overload static method?	Yes, by changing the number or type of parameters.
+Can we write non-abstract methods in an Interface?	Yes, since Java 8 using the default and static keywords.
+What is the use of constructor in Java?	To initialize an object when it is created.
+What is Hashmap? Can we store objects in Hashmap and how to retrieve them?	HashMap is a non-synchronized class that stores data in key-value pairs (using hashing). Yes, you store them using map.put(key, value) and retrieve them using map.get(key).
+Collection framework in java	Core Interfaces in the Collections Framework
+Here are some common interfaces, along with their classes:
+
+Interface	Common Classes	Description
+List	ArrayList, LinkedList	Ordered collection that allows duplicates
+
+Set	HashSet, TreeSet, LinkedHashSet	Collection of unique elements
+
+Map	HashMap, TreeMap, LinkedHashMap	Stores key-value pairs with unique keys
+
+Overview of Classes
+The table below gives an overview of the common data 
+
+structure classes and their characteristics:
+
+Interface	Class	Description
+
+List	ArrayList	Resizable array that maintains order and allows duplicates
+
+LinkedList	List with fast insert and remove operations
+
+Set	HashSet	Unordered collection of unique elements
+
+TreeSet	Sorted set of unique elements (natural order)
+
+LinkedHashSet	Maintains the order in which elements were inserted
+
+Map	HashMap	Stores key/value pairs with no specific order
+
+TreeMap	Sorted map based on the natural order of keys
+
+LinkedHashMap	Maintains the order in which keys were inserted
+
+
+List:
+•	ArrayList - like a resizable array with fast random access
+•	LinkedList - like a train of cars you can easily attach or remove
+ArrayList Mesthods:
+addAll(): Adds a collection of items to the list, either at the end or at a specified index.
+clear(): Removes all elements from the list.
+contains(): Checks whether a specified item exists in the list and returns a boolean value.
+get(): Returns the element at a specified index in the list.
+indexOf(): Returns the index of the first occurrence of a specified item, or -1 if not found.
+isEmpty(): Checks if the list is empty and returns a boolean value.
+remove(): Removes the first occurrence of a specific object or removes the element at a specified index.
+set(): Replaces the item at a specified position with a new value.
+size(): Returns the number of items currently in the list.
+sort(): Sorts the elements in the list, optionally using a custom Comparator.
+toArray(): Converts the ArrayList into a standard array.
+Linked list methods:
+Method	Description	Try it
+addFirst()	Adds an element to the beginning of the list	
+addLast()	Add an element to the end of the list	
+removeFirst()	Remove an element from the beginning of the list	
+removeLast()	Remove an element from the end of the list	
+getFirst()	Get the element at the beginning of the list	
+getLast()	Get the element at the end of the list	
+
+
+Set Interface:
+•	HashSet - fast and unordered
+•	TreeSet - sorted set
+•	LinkedHashSet - ordered by insertion
+Common Set Methods
+Method	Description
+add()	Adds an element if it's not already in the set
+remove()	Removes the element from the set
+contains()	Checks if the set contains the element
+size()	Returns the number of elements
+clear()	Removes all elements
+
+Set vs. List
+List	Set
+Allows duplicates	Does not allow duplicates
+Maintains order	Does not guarantee order
+Access by index	No index-based access
+
+Map:
+Common classes that implement Map:
+•	HashMap - fast and unordered
+•	TreeMap - sorted by key
+•	LinkedHashMap - ordered by insertion
+
+Common Map Methods
+Method	Description
+V put(K key, V value): Associates the specified value with the specified key in the map.
+V get(Object key): Returns the value to which the specified key is mapped, or null if the map contains no mapping for the key.
+boolean containsKey(Object key): Returns true if the map contains a mapping for the specified key.
+V remove(Object key): Removes the mapping for a key from the map if it is present.
+Set<K> keySet(): Returns a Set view of the keys contained in this map.
+Collection<V> values(): Returns a Collection view of the values contained in this map.
+Set<Map.Entry<K, V>> entrySet(): Returns a Set view of the mappings contained in this map.
+
+Map vs. Set vs. List
+Feature	List	Set	Map
+Duplicates allowed?	Yes	No	Keys: No
+Values: Yes
+
+Stores key-value pairs?	No	No	Yes
+Maintains order?	Yes	No (unless using TreeSet or LinkedHashSet)	No (unless using TreeMap or LinkedHashMap)
+
+Collection menthods:
+sort(List list): Sorts the elements in the specified list into ascending order.
+binarySearch(List list, Object key): Searches the specified list for the specified object using the binary search algorithm.
+reverse(List list): Reverses the order of the elements in the specified list.
+shuffle(List list): Randomly shuffles the elements in the specified list.
+
+List<Integer> numbers = new ArrayList<>(List.of(3, 1, 4, 2));
+Collections.sort(numbers);
+System.out.println(numbers); // Output: [1, 2, 3, 4]
+
+List<Integer> sortedNumbers = new ArrayList<>(List.of(10, 20, 30, 40));
+int index = Collections.binarySearch(sortedNumbers, 30);
+System.out.println("Index of 30: " + index); // Output: Index of 30: 2
+
+List<String> items = new ArrayList<>(List.of("A", "B", "C"));
+Collections.reverse(items);
+System.out.println(items); // Output: [C, B, A]
+
+Synchronizing collections:
+•	Methods Available:
+o	Collections.synchronizedList(List<T> list)
+o	Collections.synchronizedSet(Set<T> s)
+o	Collections.synchronizedMap(Map<K,V> m)
+o	Collections.synchronizedCollection(Collection<T> c)
+•	Critical Requirement (Iteration): When iterating over a synchronized collection, you must manually synchronize on the collection object to avoid ConcurrentModificationException.
+
+Ex:
+java
+List<String> syncList = Collections.synchronizedList(new ArrayList<>());
+synchronized (syncList) { // Manual synchronization required for iteration
+    for (String item : syncList) {
+        System.out.println(item);
+    }
+}
+
+
+Difference between HashMap and HashSet?	HashMap stores key-value pairs. HashSet stores unique elements (values only, using a HashMap internally where all values are mapped to a dummy object).
+Access modifiers in Java and its scope?	public (accessible everywhere), protected (accessible within the package and by subclasses), default (accessible only within the package), private (accessible only within the class).
+What is singleton class in Java?	A class that can have only one instance (object) at any time. It typically has a private constructor and a static method to return the instance.
+What is the difference between static binding and dynamic binding?	Static (Compile-time) Binding: Method linking done at compile time (e.g., method overloading). Dynamic (Runtime) Binding: Method linking done at run time (e.g., method overriding).
+Is HashMap thread safe?	No. Use Collections.synchronizedMap(new HashMap()) or ConcurrentHashMap for thread-safe operations.
+How to get value of static variable?	Access it using the Class Name (e.g., ClassName.staticVariable).
+Can we overload private methods?	Yes, within the same class.
+Is it possible to extend a Final Class?	No. A final class cannot be inherited.
+Is it possible to override a Static Method?	No (method hiding occurs instead).
+What would happen if multiple inheritance is possible in Java?	It would lead to the Diamond Problem (ambiguity for a method call inherited from multiple parent classes). This is why Java uses Interfaces to achieve multiple type inheritance.
+Difference between Encapsulation and Abstraction?	Encapsulation is data hiding (binding data and methods into a single unit/class). Abstraction is showing only essential information and hiding the implementation details (using abstract classes/interfaces).
+What is the use finally and how it differs from the final keyword?	finally is a code block that always executes. final is a keyword used for restriction/constancy (variables, methods, classes).
+OOPS Concept	Core Concepts of Java OOP
+Class: A class is a blueprint or template from which individual objects are created. It defines the properties (attributes/fields) and behaviors (methods) that all objects of that type will have.
+Object: An object is an instance of a class, representing a real-life entity. Each object has its own state (data) and can perform actions through its methods. 
+The Four Pillars of OOP
+Encapsulation: This involves bundling data and methods within a class, controlling access to the data, typically by making variables private and using public getter and setter methods. This helps in data hiding and security.
+Inheritance: Allows a new class (subclass) to acquire properties and behaviors from an existing class (superclass), promoting code reuse and establishing an "is-a" relationship. In Java, this is done using the extends keyword.
+class Animal { // Parent class
+    void eat() { System.out.println("Eating..."); }
+}
+class Dog extends Animal { // Child class
+    void bark() { System.out.println("Barking..."); }
+}
+
+
+Polymorphism: Meaning "many forms," polymorphism in Java enables a single method or object to have different behaviors depending on the context. This is achieved through Method Overloading (same method name, different parameters) and Method Overriding (subclass providing a specific implementation of a superclass method).
+•	Compile-time Polymorphism (Overloading): Multiple methods in the same class with the same name but different parameters.
+•	Runtime Polymorphism (Overriding): A subclass provides its own specific implementation for a method already defined in its parent class.
+o	Example: A Shape class has a draw() method. Both Circle and Square classes override it to draw their respective shapes.
+ 
+Example: When you use a remote control, you press a button to change channels (the interface), but you don't need to know how the internal circuitry processes that signal (the implementation)
+
+Abstraction: This principle focuses on showing only essential features while hiding implementation details. It allows focusing on what an object does rather than how it does it and is achieved in Java through abstract classes and interfaces.
+Java 8 features	•	Lambda Expressions: Allows treating functionality as a method argument or code as data. They provide a concise way to implement Single Abstract Method (SAM) interfaces.
+o	Example: (a, b) -> a + b; replaces the need for bulky anonymous inner classes.
+•	Functional Interfaces: An interface with exactly one abstract method. Java 8 introduced a standard set in the java.util.function package, such as Predicate, Consumer, and Function.
+•	Stream API: A powerful abstraction for processing sequences of elements (like collections) in a declarative way. It supports intermediate (filter, map) and terminal (forEach, collect) operations.
+o	Example: list.stream().filter(n -> n % 2 == 0).forEach(System.out::println); filters and prints even numbers.
+•	Default and Static Methods in Interfaces: Interfaces can now contain non-abstract methods with a default keyword or static implementations. This allows adding new functionality to interfaces without breaking existing implementations.
+•	Method References: A shorthand syntax for lambda expressions that simply call an existing method.
+o	Syntax: System.out::println instead of (x) -> System.out.println(x).
+•	Optional Class: A container object in java.util used to represent the presence or absence of a value, helping to avoid NullPointerException.
+•	New Date and Time API: Replaced the problematic java.util.Date with the new, thread-safe, and immutable java.time package featuring LocalDate, LocalTime, and ZonedDateTime.
+•	Nashorn JavaScript Engine: A faster JavaScript engine that allowed executing JavaScript code dir¬¬¬¬¬¬¬¬¬¬¬¬ectly within the Java Virtual Machine (JVM).
+•	Parallel Array Sorting: The Arrays.parallelSort() method uses a multithreading approach (fork-join framework) to sort arrays significantly faster.
+•	Base64 Encoding/Decoding: Java 8 added a standard java.util.Base64 class to handle Base64 operations without external libraries
+
+JDK 21:
+Key Permanent Features
+•	Virtual Threads (JEP 444): Lightweight threads that dramatically reduce the resource overhead of writing high-throughput concurrent applications. Unlike traditional platform threads that require ~1MB of memory, virtual threads require only about 1KB.
+o	Example:
+java
+try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    executor.submit(() -> System.out.println("Running in virtual thread"));
+}
+Use code with caution.
+•	Sequenced Collections (JEP 431): New interfaces (SequencedCollection, SequencedSet, SequencedMap) provide a uniform way to access the first and last elements of collections with a defined encounter order.
+o	Example:
+java
+List<String> list = new ArrayList<>(List.of("A", "B"));
+list.addFirst("Start");
+String first = list.getFirst(); // "Start"
+List<String> reversed = list.reversed();
+Use code with caution.
+•	Record Patterns (JEP 440): Enhances pattern matching by allowing the deconstruction of record values directly in instanceof or switch.
+o	Example:
+java
+record Point(int x, int y) {}
+if (obj instanceof Point(int x, int y)) {
+    System.out.println("X is " + x + ", Y is " + y);
+}
+Use code with caution.
+•	Pattern Matching for Switch (JEP 441): Extends switch to support type patterns and record patterns, including "guards" using the when clause.
+o	Example:
+java
+return switch (obj) {
+    case Integer i when i > 0 -> "Positive Int";
+    case String s -> "String of length " + s.length();
+    case null -> "Null value";
+    default -> "Unknown";
+};
+Use code with caution.
+•	Generational ZGC (JEP 439): Extends the Z Garbage Collector to maintain separate generations for young and old objects, improving application performance and reducing CPU overhead
+
+
+Lamda expressions	Syntax Overview
+The basic syntax consists of three parts: a parameter list, the arrow operator (->), and a body. 
+•	Parameters: Can be zero (), one (p), or multiple (a, b). Type declaration is optional.
+•	Arrow (->): Separates the parameters from the logic.
+•	Body: Can be a single expression (no braces or return needed) or a block of code {} (requires return for non-void methods). 
+________________________________________
+Examples of Lambda Expressions
+1. Zero Parameters
+Used for interfaces like Runnable where the method takes no arguments. 
+java
+// Implementation of Runnable
+Runnable task = () -> System.out.println("Task is running!");
+task.run();
+Use code with caution.
+ 
+2. Single Parameter
+If there is only one parameter, parentheses are optional. 
+java
+// Doubling a number
+Function<Integer, Integer> doubleIt = n -> n * 2;
+System.out.println(doubleIt.apply(5)); // Output: 10
+Use code with caution.
+ 
+3. Multiple Parameters
+Parentheses are required for more than one parameter. 
+java
+// Adding two numbers
+BinaryOperator<Integer> add = (a, b) -> a + b;
+System.out.println(add.apply(10, 20)); // Output: 30
+Use code with caution.
+ 
+4. Iterating Collections
+Lambdas are commonly used with the forEach method for clean iteration. 
+java
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+names.forEach(name -> System.out.println(name));
+Use code with caution.
+ 
+5. Filtering with Streams
+Used within the Stream API to filter data based on conditions. 
+java
+List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
+numbers.stream()
+       .filter(n -> n % 2 == 0) // Keep even numbers
+       .forEach(System.out::println);
+Use code with caution.
+ 
+Comparison: Anonymous Class vs. Lambda
+Feature 	Anonymous Class	Lambda Expression
+Boilerplate	High (method/class signatures required)	Low (concise syntax)
+Scope	Creates its own scope for this	Refers to enclosing class scope
+Efficiency	New class file generated for each instance	More memory efficient
+
+Streams	Key Operations
+Stream operations are divided into two categories: 
+•	Intermediate Operations (return a Stream):
+o	filter(): Selects elements matching a given condition.
+o	map(): Transforms each element into another value.
+o	sorted(): Sorts the elements of a stream.
+o	distinct(): Removes duplicate elements.
+o	limit(): Truncates the stream to a maximum size.
+o	skip(): Discards the first n elements.
+•	Terminal Operations (produce a result or side-effect):
+o	collect(): Gathers the processed elements into a Collection (e.g., a List or Set).
+o	forEach(): Performs an action for each element.
+o	reduce(): Combines all elements into a single result (e.g., calculating a sum).
+o	count(): Returns the number of elements in the stream.
+o	anyMatch(), allMatch(), noneMatch(): Check if elements match a given predicate. 
+
+Abstract class and Interface	1. Abstract Class
+An abstract class is a partially implemented class that cannot be instantiated directly. It is used when you have a group of closely related classes that share a common identity and logic. 
+•	Structure:
+o	Methods: Can have both abstract methods (no body) and concrete methods (with implementation).
+o	Fields: Can have instance variables (non-static, non-final) that maintain the state of an object.
+o	Constructors: Can have constructors to initialize common state for subclasses.
+o	Access Modifiers: Methods can be public, protected, or private.
+•	Behavior in Subclass:
+o	Compulsory Implementation: A subclass must override all abstract methods unless it is also declared as an abstract class.
+o	Single Inheritance: A class can only extend one abstract class.
+o	Method Overriding: Subclasses can override concrete methods to change their behavior or use them as-is. 
+2. Interface
+An interface is a contract that defines what a class can do, rather than what it is. It is ideal for defining common behaviors among unrelated classes. 
+•	Structure:
+o	Methods: By default, methods are public and abstract. Since Java 8+, it can also have default and static methods with implementations. Java 9+ introduced private methods for internal reuse.
+o	Fields: Variables are implicitly public static final (constants).
+o	No Constructors: Interfaces cannot have constructors.
+•	Behavior in Subclass:
+o	Implementation Contract: A class "implements" an interface and must provide bodies for all its abstract methods.
+o	Multiple Implementation: A class can implement multiple interfaces, allowing it to take on many behaviors.
+o	Default Methods: If an interface provides a default method, the subclass can use it without overriding it, which helps evolve APIs without breaking old code. 
+Feature 	Abstract Class	Interface
+Inheritance	Single inheritance (extends)	Multiple inheritance (implements)
+State	Can have instance variables	Can only have constants
+Methods	Abstract, concrete, final, static	Abstract, default, static, private
+Constructors	Yes	No
+Access	Any modifier (private, protected, etc.)	Implicitly public (except private methods)
+When to use which?
+•	Use an Abstract Class when you want to provide a common base with shared code and state for a tightly related family of classes (e.g., Animal -> Dog, Cat).
+•	Use an Interface when you want to define a specific capability that many different types of objects can have (e.g., Flyable -> Bird, Airplane, Drone)
+
+
+
+
+Streams	
+ 
+
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class StreamIntermediateOperationsExample {
+    public static void main(String[] args) {
+        // List of lists of names
+        List<List<String>> listOfLists = Arrays.asList(
+            Arrays.asList("Reflection", "Collection", "Stream"),
+            Arrays.asList("Structure", "State", "Flow"),
+            Arrays.asList("Sorting", "Mapping", "Reduction", "Stream")
+        );
+
+        // Create a set to hold intermediate results
+        Set<String> intermediateResults = new HashSet<>();
+
+        // Stream pipeline demonstrating various intermediate operations
+        List<String> result = listOfLists.stream()
+            .flatMap(List::stream)              
+            .filter(s -> s.startsWith("S"))      
+            .map(String::toUpperCase)          
+            .distinct()                          
+            .sorted()                            
+            .peek(s -> intermediateResults.add(s))
+            .collect(Collectors.toList());      
+
+        // Print the intermediate results
+        System.out.println("Intermediate Results:");
+        intermediateResults.forEach(System.out::println);
+
+        // Print the final result
+        System.out.println("Final Result:");
+        result.forEach(System.out::println);
+    }
+}
+
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class StreamTerminalOperationsExample {
+    public static void main(String[] args) {
+        // Sample data
+        List<String> names = Arrays.asList(
+            "Reflection", "Collection", "Stream",
+            "Structure", "Sorting", "State"
+        );
+
+        // forEach: Print each name
+        System.out.println("forEach:");
+        names.stream().forEach(System.out::println);
+
+        // collect: Collect names starting with 'S' into a list
+        List<String> sNames = names.stream()
+                                   .filter(name -> name.startsWith("S"))
+                                   .collect(Collectors.toList());
+        System.out.println("\ncollect (names starting with 'S'):");
+        sNames.forEach(System.out::println);
+
+        // reduce: Concatenate all names into a single string
+        String concatenatedNames = names.stream().reduce(
+            "",
+            (partialString, element) -> partialString + " " + element
+        );
+        System.out.println("\nreduce (concatenated names):");
+        System.out.println(concatenatedNames.trim());
+
+        // count: Count the number of names
+        long count = names.stream().count();
+        System.out.println("\ncount:");
+        System.out.println(count);
+
+        // findFirst: Find the first name
+        Optional<String> firstName = names.stream().findFirst();
+        System.out.println("\nfindFirst:");
+        firstName.ifPresent(System.out::println);
+
+        // allMatch: Check if all names start with 'S'
+        boolean allStartWithS = names.stream().allMatch(
+            name -> name.startsWith("S")
+        );
+        System.out.println("\nallMatch (all start with 'S'):");
+        System.out.println(allStartWithS);
+
+        // anyMatch: Check if any name starts with 'S'
+        boolean anyStartWithS = names.stream().anyMatch(
+            name -> name.startsWith("S")
+        );
+        System.out.println("\nanyMatch (any start with 'S'):");
+        System.out.println(anyStartWithS);
+    }
+}
+
+
+
+
+
+
+
+
+Sorting class objects:
+import java.util.Comparator;
+import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+class Employee {
+    private String name;
+    private double salary;
+
+    public Employee(String name, double salary) {
+        this.name = name;
+        this.salary = salary;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{name='" + name + "', salary=" + salary + '}';
+    }
+}
+
+Here is the main class with the stream operations:
+java
+public class EmployeeStreamExample {
+    public static void main(String[] args) {
+        List<Employee> employees = Arrays.asList(
+            new Employee("John", 60000.0),
+            new Employee("Alice", 50000.0),
+            new Employee("Bob", 75000.0),
+            new Employee("Alice", 55000.0), // Duplicate name for multi-sort test
+            new Employee("David", 45000.0)
+        );
+
+        // 1. Filter employees with salary > 50000 and sort by salary
+        System.out.println("--- Filter by salary > 50000 and sort by salary (ascending) ---");
+        List<Employee> highPaidSortedBySalary = employees.stream()
+            .filter(e -> e.getSalary() > 50000.0)
+            .sorted(Comparator.comparingDouble(Employee::getSalary))
+            .collect(Collectors.toList());
+        highPaidSortedBySalary.forEach(System.out::println);
+
+        // 2. Sort employees by name only (ascending)
+        System.out.println("\n--- Sort by name (ascending) ---");
+        List<Employee> sortedByName = employees.stream()
+            .sorted(Comparator.comparing(Employee::getName))
+            .collect(Collectors.toList());
+        sortedByName.forEach(System.out::println);
+
+        // 3. Sort employees by name, and if names are same, sort by salary
+        System.out.println("\n--- Sort by name, then by salary (ascending) ---");
+        List<Employee> sortedByNameThenSalary = employees.stream()
+            .sorted(Comparator.comparing(Employee::getName)
+                              .thenComparingDouble(Employee::getSalary))
+            .collect(Collectors.toList());
+        sortedByNameThenSalary.forEach(System.out::println);
+    }
+}
+Example Output
+--- Filter by salary > 50000 and sort by salary (ascending) ---
+Employee{name='Alice', salary=55000.0}
+Employee{name='John', salary=60000.0}
+Employee{name='Bob', salary=75000.0}
+
+--- Sort by name (ascending) ---
+Employee{name='Alice', salary=50000.0}
+Employee{name='Alice', salary=55000.0}
+Employee{name='Bob', salary=75000.0}
+Employee{name='David', salary=45000.0}
+Employee{name='John', salary=60000.0}
+
+--- Sort by name, then by salary (ascending) ---
+Employee{name='Alice', salary=50000.0}
+Employee{name='Alice', salary=55000.0}
+Employee{name='Bob', salary=75000.0}
+Employee{name='David', salary=45000.0}
+Employee{name='John', salary=60000.0}
+
+
+
+Inheritance examples	// 1. Parent (Super) Class
+class Vehicle {
+    protected String brand = "Ford"; // Accessible to subclasses
+
+    public void startEngine() {
+        System.out.println("Engine starting...");
+    }
+}
+
+// 2. Child (Sub) Class
+class Car extends Vehicle {
+    private String model = "Mustang";
+
+    // Subclass specific method
+    public void displayDetails() {
+        // Can access parent variable directly if not private
+        System.out.println("Brand: " + brand + ", Model: " + model);
+    }
+
+    @Override
+    public void startEngine() {
+        // Calling the parent version of the method using 'super'
+        super.startEngine(); 
+        System.out.println("Car specifically is ready to race!");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // 3. Creating an Object of the subclass
+        Car myCar = new Car();
+
+        // 4. Method Calls
+        myCar.startEngine();    // Calls overridden method in subclass
+        myCar.displayDetails(); // Calls subclass-specific method
+    }
+}
+
+Key Mechanisms Explained
+•	Object Creation: When you use new Car(), Java first invokes the constructor of the parent (Vehicle) and then the child (Car) to ensure all inherited properties are initialized.
+•	Method Calls:
+o	Inherited Methods: If a method is defined only in the parent, calling it from a child object executes the parent's code.
+o	Overridden Methods: If the child redefines a parent method, the child's version is called by default.
+•	The super Keyword:
+o	Inside Methods: Used to call the original parent version of a method that has been overridden.
+o	Inside Constructors: Used (as super()) to explicitly call a parent constructor, particularly if the parent requires specific arguments.
+•	Parent References: A parent class reference variable can hold a child object (e.g., Vehicle v = new Car();). However, it can generally only access methods and variables defined in the Vehicle class unless the object is cast back to a Car. 
+
+Example2: Accessing Only Parent Members
+Even if the actual object is a Car, the Vehicle reference limits your access to only those methods and variables defined in Vehicle.
+class Vehicle {
+    String type = "Generic Vehicle";
+    void move() { System.out.println("Vehicle is moving"); }
+}
+
+class Car extends Vehicle {
+    String model = "Sedan"; // Child-specific variable
+    void openTrunk() { System.out.println("Trunk is open"); } // Child-specific method
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // Upcasting: Parent reference holds Child object
+        Vehicle v = new Car(); 
+
+        v.move();           // ✅ Works: Defined in Vehicle
+        // v.openTrunk();   // ❌ Compile Error: Vehicle does not have openTrunk()
+        // System.out.println(v.model); // ❌ Compile Error: Vehicle does not have model
+    }
+}
+
+Example3: Runtime Polymorphism (Overriding)
+While the parent reference cannot access new child methods, if the child overrides a parent method, the child's version will execute at runtime. 
+
+class Vehicle {
+    void start() { System.out.println("Generic start"); }
+}
+
+class Car extends Vehicle {
+    @Override
+    void start() { System.out.println("Car starts with a roar!"); }
+}
+
+
+Vehicle v = new Car();
+v.start(); // Outputs: "Car starts with a roar!" (Dynamic Method Dispatch)
+
+3.  Downcasting: Accessing Child-Specific Members
+Vehicle v = new Car();
+
+// Explicit Downcasting to access Car-specific features
+if (v instanceof Car) { // Best practice: Check type first to avoid ClassCastException
+    Car myCar = (Car) v;
+    myCar.openTrunk();  // ✅ Now works after casting
+    System.out.println("Model: " + myCar.model); // ✅ Now accessible
+}
+
+
+
+Excel reader	
+<dependency>
+    <groupId>org.apache.poi</groupId>
+    <artifactId>poi-ooxml</artifactId>
+    <version>5.2.5</version>
+</dependency>
+
+public class ExcelReader {
+
+    public List<Map<String, String>> getData(String filePath, String sheetName) throws Exception {
+        List<Map<String, String>> dataList = new ArrayList<>();
+        
+        // Open the Workbook
+        Workbook workbook = WorkbookFactory.create(new File(filePath));
+        Sheet sheet = workbook.getSheet(sheetName);
+        
+        Row headerRow = sheet.getRow(0); // Assuming first row is header
+        int totalRows = sheet.getPhysicalNumberOfRows();
+        int totalCols = headerRow.getPhysicalNumberOfCells();
+
+        // Iterate rows (starting from 1 to skip header)
+        for (int i = 1; i < totalRows; i++) {
+            Row currentRow = sheet.getRow(i);
+            Map<String, String> rowMap = new HashMap<>();
+
+            for (int j = 0; j < totalCols; j++) {
+                String headerName = headerRow.getCell(j).getStringCellValue();
+                Cell cell = currentRow.getCell(j);
+                
+                // Format cell content as String regardless of type
+                DataFormatter formatter = new DataFormatter();
+                rowMap.put(headerName, formatter.formatCellValue(cell));
+            }
+            dataList.add(rowMap);
+        }
+        workbook.close();
+        return dataList;
+    }
+}
+
+Database reader	
+
+<dependency>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <version>8.3.0</version>
+</dependency>
+
+public class DatabaseReader {
+
+    public Map<String, String> getRowData(String query) {
+        Map<String, String> rowData = new HashMap<>();
+        String url = "jdbc:mysql://localhost:3306/your_db";
+        String user = "username";
+        String password = "password";
+
+        // Auto-closes Connection, Statement, and ResultSet
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            if (rs.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = metaData.getColumnName(i);
+                    rowData.put(columnName, rs.getString(i));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rowData;
+    }
+}
+
+	
+Jenkins
+	pipeline {
+    agent any
+    tools {
+        maven 'Maven_3.9.x'
+        jdk 'Java_17'
+    }
+    stages {
+        stage('Checkout') { steps { checkout scm } }
+        stage('Build & Test') { 
+            steps { sh 'mvn clean test' } 
+        }
+    }
+    post {
+        always {
+            // Archive the report so it's accessible in Jenkins UI
+            publishHTML(target: [
+                reportDir: 'target/SparkReport', 
+                reportFiles: 'Spark.html',
+                reportName: 'Extent API Report'
+            ])
+
+            // Send Email with Attachment
+            emailext (
+                subject: "Build ${currentBuild.currentResult}: Job ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """<p>The API Test execution has finished.</p>
+                         <p><strong>Status:</strong> ${currentBuild.currentResult}</p>
+                         <p>View detailed report here: <a href='${env.BUILD_URL}Extent_20API_20Report/'>Extent Report Link</a></p>""",
+                to: 'team-lead@example.com, qa-team@example.com',
+                from: 'jenkins-automation@example.com',
+                attachmentsPattern: 'target/SparkReport/Spark.html', // Path to the report file
+                mimeType: 'text/html'
+            )
+        }
+    }
+}
+
+Git actions	name: Daily Selenium Maven Automation
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight UTC
+  workflow_dispatch:      # Manual trigger button
+
+jobs:
+  automation-suite:
+    runs-on: ubuntu-latest
+    
+    services:
+      selenium:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+
+    steps:
+      - name: Checkout Code
+        uses: [actions/checkout@v4](https://github.com)
+
+      - name: Setup Java
+        uses: [actions/setup-java@v4](https://github.com)
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Maven Tests
+        # Force headless mode or point to the selenium service container
+        run: mvn test -Dselenium.remote.url="http://localhost:4444/wd/hub"
+        continue-on-error: true
+
+      - name: Send Email Notification
+        uses: [dawidd6/action-send-mail@v3](https://github.com)
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: Selenium Test Report - ${{ github.run_id }}
+          to: recipient@example.com
+          from: GitHub Actions
+          body: Execution completed. See attached report for details.
+          attachments: target/surefire-reports/emailable-report.html
+
+SQL	SELECT CustomerName, City FROM Customers;
+SELECT DISTINCT Country FROM Customers;
+SELECT * FROM Customers
+WHERE Country='Mexico';
+
+SELECT * FROM Customers
+WHERE CustomerID > 80;
+
+SELECT * FROM Products
+ORDER BY Price;
+
+SELECT * FROM Products
+ORDER BY ProductName DESC;
+
+SELECT *
+FROM Customers
+WHERE Country = 'Spain' AND CustomerName LIKE 'G%';
+
+SELECT * FROM Customers
+WHERE Country = 'Spain' AND CustomerName LIKE 'G%' OR CustomerName LIKE 'R%';
+
+SELECT *
+FROM Customers
+WHERE Country = 'Germany' OR Country = 'Spain';
+
+
+SELECT * FROM Customers
+WHERE City = 'Berlin' OR CustomerName LIKE 'G%' OR Country = 'Norway';
+
+SELECT * FROM Customers
+WHERE CustomerName NOT LIKE 'A%';
+
+SELECT * FROM Customers
+WHERE NOT Country = 'Spain';
+
+INSERT INTO Customers (CustomerName, ContactName, Address, City, PostalCode, Country)
+VALUES ('Cardinal', 'Tom B. Erichsen', 'Skagen 21', 'Stavanger', '4006', 'Norway');
+UPDATE Customers
+SET ContactName = 'Alfred Schmidt', City= 'Frankfurt'
+WHERE CustomerID = 1;
+
+DELETE FROM table_name WHERE condition;
+
+SELECT TOP 3 * FROM Customers;
+•	MIN() - returns the smallest value within the selected column
+•	MAX() - returns the largest value within the selected column
+•	COUNT() - returns the number of rows in a set
+•	SUM() - returns the total sum of a numerical column
+•	AVG() - returns the average value of a numerical column
+
+SELECT MIN(Price)
+FROM Products;
+
+SELECT SUM(Quantity)
+FROM OrderDetails;
+
+SELECT AVG(Price)
+FROM Products;
+
+SELECT * FROM Customers
+WHERE CustomerName LIKE 'a%';
+
+SELECT * FROM Customers
+WHERE CustomerName LIKE 'a%';
+
+SELECT * FROM Customers
+WHERE Country IN ('Germany', 'France', 'UK');
+
+SELECT * FROM Products
+WHERE Price BETWEEN 10 AND 20;
+
+
+SELECT CustomerID AS ID, CustomerName AS Customer
+FROM Customers;
+
+The INNER JOIN keyword selects records that have matching values in both tables.
+SELECT ProductID, ProductName, CategoryName
+FROM Products
+INNER JOIN Categories ON Products.CategoryID = Categories.CategoryID;
+
+
+The LEFT JOIN keyword returns all records from the left table (table1), and the matching records from the right table (table2). The result is 0 records from the right side, if there is no match.
+SELECT column_name(s)
+FROM table1
+LEFT JOIN table2
+ON table1.column_name = table2.column_name;
+
+The RIGHT JOIN keyword returns all records from the right table (table2), and the matching records from the left table (table1). The result is 0 records from the left side, if there is no match.
+
+SELECT Orders.OrderID, Employees.LastName, Employees.FirstName
+FROM Orders
+RIGHT JOIN Employees ON Orders.EmployeeID = Employees.EmployeeID
+ORDER BY Orders.OrderID;
+
+The FULL OUTER JOIN keyword returns all records when there is a match in left (table1) or right (table2) table records.
+
+SELECT column_name(s)
+FROM table1
+FULL OUTER JOIN table2
+ON table1.column_name = table2.column_name
+WHERE condition;
+
+SQL Self Join
+A self join is a regular join, but the table is joined with itself.
+
+SELECT column_name(s)
+FROM table1 T1, table1 T2
+WHERE condition;
+
+
+
+SELECT A.CustomerName AS CustomerName1, B.CustomerName AS CustomerName2, A.City
+FROM Customers A, Customers B
+WHERE A.CustomerID <> B.CustomerID
+AND A.City = B.City
+ORDER BY A.City;
+
+
+The UNION operator is used to combine the result-set of two or more SELECT statements.
+
+The UNION operator automatically removes duplicate rows from the result set.
+
+SELECT column_name(s) FROM table1
+UNION
+SELECT column_name(s) FROM table2;
+
+SELECT City FROM Customers
+UNION
+SELECT City FROM Suppliers
+ORDER BY City;
+
+The UNION ALL operator is used to combine the result-set of two or more SELECT statements.
+The UNION ALL operator includes all rows from each statement, including any duplicates.
+
+
+SELECT column_name(s) FROM table1
+UNION ALL
+SELECT column_name(s) FROM table2;
+
+SELECT column_name(s)
+FROM table_name
+WHERE condition
+GROUP BY column_name(s)
+ORDER BY column_name(s);
+
+SELECT COUNT(CustomerID), Country
+FROM Customers
+GROUP BY Country;
+
+
+SELECT COUNT(CustomerID), Country
+FROM Customers
+GROUP BY Country
+ORDER BY COUNT(CustomerID) DESC;
+
+SELECT COUNT(CustomerID), Country
+FROM Customers
+GROUP BY Country
+HAVING COUNT(CustomerID) > 5;
+
+CREATE DATABASE testDB;
+
+
+CREATE TABLE table_name (
+    column1 datatype,
+    column2 datatype,
+    column3 datatype,
+   ....
+);
+
+CREATE TABLE Persons (
+    PersonID int,
+    LastName varchar(255),
+    FirstName varchar(255),
+    Address varchar(255),
+    City varchar(255)
+);
+
+DROP TABLE table_name;
+
+The TRUNCATE TABLE statement is used to delete the data inside a table, but not the table itself.
+TRUNCATE TABLE table_name;
+
+ALTER TABLE Customers
+ADD Email varchar(255);
+
+ALTER TABLE table_name
+DROP COLUMN column_name;
+
+ALTER TABLE table_name
+RENAME COLUMN old_name to new_name;
+
+ALTER TABLE table_name
+MODIFY column_name datatype;
+
+
+SQL Create Constraints
+
+•	NOT NULL - Ensures that a column cannot have a NULL value
+•	UNIQUE - Ensures that all values in a column are different
+•	PRIMARY KEY - A combination of a NOT NULL and UNIQUE. Uniquely identifies each row in a table
+•	FOREIGN KEY - Prevents actions that would destroy links between tables
+•	CHECK - Ensures that the values in a column satisfies a specific condition
+•	DEFAULT - Sets a default value for a column if no value is specified
+•	CREATE INDEX - Used to create and retrieve data from the database very quickly
+CREATE TABLE Orders (
+    OrderID int NOT NULL,
+    OrderNumber int NOT NULL,
+    PersonID int,
+    PRIMARY KEY (OrderID),
+    FOREIGN KEY (PersonID) REFERENCES Persons(PersonID)
+);
+
+
+
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    PRIMARY KEY (ID)
+);
+
+
+https://www.w3schools.com/sql/sql_or.asp
+
+
+Question	Short Answer
+Different types of Navigation Commands?	driver.get(url), driver.navigate().to(url), driver.navigate().back(), driver.navigate().forward(), driver.navigate().refresh().
+Difference between assert and verify?	assert is a hard stop; test execution stops immediately on failure. verify is a soft assertion; failure is recorded, but the test continues.
+@Test
+public void testPageLabels() {
+    SoftAssert softAssert = new SoftAssert(); // 1. Create instance
+    
+    softAssert.assertEquals(actualName, "John", "Name mismatch"); // 2. Perform checks
+    softAssert.assertEquals(actualAge, 30, "Age mismatch"); 
+    
+    System.out.println("This prints even if assertions above fail.");
+    
+    softAssert.assertAll(); // 3. Collate and report results
+}
+@Test
+public void testLogin() {
+    String title = driver.getTitle();
+    // If this fails, the code below will NOT run
+    Assert.assertEquals(title, "Dashboard", "Login failed: Title mismatch");
+    System.out.println("This only prints if assertion passes.");
+}
+
+How to download a file using Selenium?	Selenium doesn't directly handle OS downloads. You configure browser preferences (e.g., ChromeOptions) to set the default download directory and disable download pop-ups.
+How to avoid NoSuchElementException without using try/catch?	Use Explicit Waits (WebDriverWait and ExpectedConditions) to wait for the element's presence/visibility before interacting.
+How to check whether a web element is enabled or disabled without using isEnabled() method?	Get the element's attribute value (e.g., getAttribute("disabled")) and check if it returns true or is present.
+Why is CSS locator faster than XPath?	Browsers have native, highly optimized engines for processing CSS selectors, making them generally faster than XPath.
+Selector Type 	Syntax	Example HTML	Selenium Code (Java)
+ID	#idValue	<input id="username">	driver.findElement(By.cssSelector("#username"));
+Class	.classValue	<button class="login-btn">	driver.findElement(By.cssSelector(".login-btn"));
+Tag Name	tagName	<input ...>	driver.findElement(By.cssSelector("input"));
+Attribute	[attribute='value']	<input type="submit">	driver.findElement(By.cssSelector("[type='submit']"));
+Tag & Class	tagName.classValue	<button class="submit-btn">	driver.findElement(By.cssSelector("button.submit-btn"));
+Tag & ID	tagName#idValue	<input id="username">
+
+Name attribute  	driver.findElement(By.cssSelector("input#username"));
+Advanced Selectors
+•	Hierarchy (Descendant): Use a space to select an element nested anywhere inside another.
+o	form input selects all <input> elements inside a <form>.
+•	Hierarchy (Direct Child): Use the > symbol to select an element that is a direct child of another.
+o	ul > li selects only the direct <li> children of a <ul>.
+•	Substring Matching: Useful for dynamic attributes.
+o	[attribute^='prefix']: Starts with a specific value.
+o	[attribute$='suffix']: Ends with a specific value.
+o	[attribute*='contains']: Contains a specific value anywhere.
+•	Pseudo-classes: Select elements based on their position or state, such as :first-child, :last-child, or :nth-of-type(n). 
+
+How do you execute using headless mode?	Use browser-specific Options class (e.g., ChromeOptions) and set the --headless argument: options.addArguments("--headless");.
+ChromeOptions options = new ChromeOptions();
+
+        // **1. Enable headless mode**
+        options.addArguments("--headless=new"); // Use "--headless=new" for modern Chrome
+        // options.setHeadless(true); // An alternative but now deprecated method in newer Selenium versions
+
+        // **2. Set other attributes/arguments**
+        options.addArguments("--window-size=1920,1080"); // Set a consistent viewport size
+        options.addArguments("--disable-gpu"); // Temporarily needed if running on Windows in some older versions
+        options.addArguments("--no-sandbox"); // Bypass OS security model, useful in CI/CD environments
+        options.addArguments("--disable-dev-shm-usage"); // Overcome limited resource problems in Linux containers
+        options.addArguments("--ignore-certificate-errors"); // Ignore SSL certificate errors
+
+How to get text value from text-box if getText() is not working?	Use getAttribute("value") instead, as getText() often returns an empty string for input fields.
+What will driver.getWindowHandles() return?	A Set<String> containing the unique IDs (handles) of all currently open browser windows/tabs.
+Difference between build() and perform() in Selenium?	build() compiles the chain of actions (optional for single actions). perform() executes the compiled action chain. build().perform() is used for multi-step actions.
+Actions actions = new Actions(driver);
+WebElement element = driver.findElement(By.id("someElement"));
+
+// Example of chaining actions: mouse hover and then click
+actions.moveToElement(element).click().perform();
+Method Name 	Description
+click(WebElement element)	Performs a left mouse button click on the specified element.
+doubleClick(WebElement element)	Performs a double-click on the specified element.
+contextClick(WebElement element)	Performs a right-click (context-click) on the specified element.
+moveToElement(WebElement element)	Moves the mouse pointer to the center of the specified element (useful for hover menus).
+dragAndDrop(WebElement source, WebElement target)	Drags the source element and drops it onto the target element.
+dragAndDropBy(WebElement source, int xOffset, int yOffset)	Drags the source element and moves it by a given offset before releasing.
+keyDown(CharSequence key)	Presses a modifier key (e.g., Keys.CONTROL, Keys.SHIFT) without releasing it.
+keyUp(CharSequence key)	Releases a depressed modifier key.
+sendKeys(CharSequence... keys)	Sends a sequence of keystrokes to the active element.
+Difference between submit() and click() in Selenium?	submit() is used specifically on a form element to submit it. click() can be used on any clickable element (buttons, links, form inputs).
+Difference between findElement and findElements?	findElement returns a single WebElement (throws NoSuchElementException if not found). findElements returns a List<WebElement> (returns an empty list if not found).
+Return type of findElement and findElements?	findElement: WebElement. findElements: List<WebElement>.
+Difference between absolute XPath (/) and relative XPath (//)?	Absolute (/): Starts from the root (<html>), brittle. Relative (//): Starts from anywhere in the DOM, preferred.
+What is the interface used in selenium?	Key interfaces are WebDriver, WebElement, SearchContext, and Alert.
+Difference between Factory Design and Singleton Framework?	Factory Design creates objects without exposing the instantiation logic to the client. Singleton ensures a class has only one instance and provides a global access point to it.
+1. Page Object Model (POM)
+POM is the industry standard for Selenium testing. It separates the application's UI (locators and interactions) from the test logic by creating a class for each web page. 
+•	Example: If you have a login page, you create a LoginPage class containing elements like the username field and login button.
+•	Benefit: If a UI element changes, you only update the locator in one class rather than in every test script. 
+2. Factory Design Pattern
+This pattern is used to centralize and simplify the creation of WebDriver instances (e.g., Chrome, Firefox, Safari). 
+•	Example: A WebDriverFactory class takes a string input (like "chrome") and returns the corresponding driver object.
+•	Benefit: Decouples the test scripts from the specific browser initialization logic, allowing you to switch browsers easily via configuration. 
+3. Singleton Design Pattern
+The Singleton pattern ensures that only one instance of a WebDriver exists throughout the test run. 
+•	Example: A class with a private constructor and a static method like getInstance() that returns the existing driver or creates a new one if it doesn't exist.
+•	Benefit: Prevents accidental instantiation of multiple browser windows, saving system resources. 
+java
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+// ... potentially other driver imports
+
+public class DriverManager {
+
+    // A ThreadLocal variable to store the WebDriver instance for each thread
+    private static final ThreadLocal<WebDriver> DRIVER_THREAD_LOCAL = new ThreadLocal<>();
+
+    /**
+     * Initializes the WebDriver for the current thread.
+     * @param browserType The type of browser to initialize (e.g., "chrome", "firefox").
+     */
+    public static void initializeDriver(String browserType) {
+        if (DRIVER_THREAD_LOCAL.get() == null) {
+            WebDriver driver;
+            switch (browserType.toLowerCase()) {
+                case "chrome":
+                    driver = new ChromeDriver();
+                    break;
+                case "firefox":
+                    driver = new FirefoxDriver();
+                    break;
+                // Add more cases for other browsers as needed
+                default:
+                    throw new IllegalArgumentException("Unsupported browser type: " + browserType);
+            }
+            DRIVER_THREAD_LOCAL.set(driver);
+            // Optional: Add some implicit waits or window maximization here
+            driver.manage().window().maximize();
+        }
+    }
+
+    /**
+     * Gets the WebDriver instance for the current thread.
+     * @return The WebDriver instance.
+     */
+    public static WebDriver getDriver() {
+        if (DRIVER_THREAD_LOCAL.get() == null) {
+            throw new IllegalStateException("Driver not initialized for this thread. Call initializeDriver() first.");
+        }
+        return DRIVER_THREAD_LOCAL.get();
+    }
+
+    /**
+     * Quits the WebDriver and removes the instance from ThreadLocal storage for the current thread.
+     */
+    public static void quitDriver() {
+        WebDriver driver = DRIVER_THREAD_LOCAL.get();
+        if (driver != null) {
+            driver.quit();
+            DRIVER_THREAD_LOCAL.remove(); // Essential to clear the thread's reference
+        }
+    }
+}
+Usage in Test Classes:
+In your test classes (e.g., using TestNG or JUnit's parallel execution features), you would manage the driver lifecycle: 
+java
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+public class MyTestClass {
+
+    @BeforeMethod
+    @Parameters("browser") // Assuming TestNG parameter for browser type
+    public void setUp(String browser) {
+        DriverManager.initializeDriver(browser);
+    }
+
+    @Test
+    public void testPageTitle() {
+        // Use the thread-safe driver instance
+        DriverManager.getDriver().get("https://www.example.com");
+        // ... perform test actions
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        // Quit the driver instance specific to this thread
+        DriverManager.quitDriver();
+    }
+}
+
+4. Fluent Interface Pattern
+This pattern allows you to chain method calls, making test scripts read like a narrative or "flow". 
+•	Example: Instead of calling methods separately, you write: loginPage.enterUser("admin").enterPass("123").clickLogin();.
+•	Benefit: Significantly improves code readability and reduces the verbosity of test steps. 
+5. Data-Driven Pattern
+This pattern separates the test data (e.g., login credentials) from the test scripts by storing data in external files like CSV, JSON, or Excel. 
+•	Example: Using TestNG's @DataProvider to feed multiple sets of usernames and passwords into a single login test method.
+•	Benefit: Allows you to run the same test scenario with many different inputs without modifying code. 
+6. Screenplay Pattern
+A more modern alternative to POM, the Screenplay pattern focuses on Actors, Tasks, and Interactions. 
+•	Example: An actor named "John" attempts a task called "Login" using specific interactions.
+•	Benefit: Offers better scalability for very large, complex enterprise frameworks by strictly following SOLID principles.
+Page object cucumber model with multiple browser execution.
+1. The DriverManager Class (DriverFactory)
+Create a central DriverManager class that uses ThreadLocal to manage separate WebDriver (for UI) and AppiumDriver (for Android) instances for each thread. 
+java
+import io.appium.java_client.AppiumDriver;
+import org.openqa.selenium.WebDriver;
+import java.util.HashMap;
+import java.util.Map;
+
+public class DriverManager {
+    // ThreadLocal variables to hold unique driver instances per thread
+    private static final ThreadLocal<WebDriver> WEB_DRIVER_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<AppiumDriver> APPIUM_DRIVER_THREAD_LOCAL = new ThreadLocal<>();
+    
+    // An optional map to keep track of which driver type is associated with the current thread
+    private static final ThreadLocal<String> DRIVER_TYPE = new ThreadLocal<>();
+
+    public static WebDriver getWebDriver() {
+        return WEB_DRIVER_THREAD_LOCAL.get();
+    }
+
+    public static AppiumDriver getAppiumDriver() {
+        return APPIUM_DRIVER_THREAD_LOCAL.get();
+    }
+    
+    public static void setWebDriver(WebDriver driver) {
+        WEB_DRIVER_THREAD_LOCAL.set(driver);
+        DRIVER_TYPE.set("web");
+    }
+
+    public static void setAppiumDriver(AppiumDriver driver) {
+        APPIUM_DRIVER_THREAD_LOCAL.set(driver);
+        DRIVER_TYPE.set("appium");
+    }
+
+    public static void quitDriver() {
+        String type = DRIVER_TYPE.get();
+        if (type != null) {
+            if (type.equals("web") && WEB_DRIVER_THREAD_LOCAL.get() != null) {
+                WEB_DRIVER_THREAD_LOCAL.get().quit();
+                WEB_DRIVER_THREAD_LOCAL.remove();
+            } else if (type.equals("appium") && APPIUM_DRIVER_THREAD_LOCAL.get() != null) {
+                APPIUM_DRIVER_THREAD_LOCAL.get().quit();
+                APPIUM_DRIVER_THREAD_LOCAL.remove();
+            }
+            DRIVER_TYPE.remove(); // Essential to prevent memory leaks
+        }
+    }
+
+    // Add methods for initializing drivers with capabilities based on test parameters
+    // public static void initializeWebDriver(String browserName) { ... }
+    // public static void initializeAppiumDriver(DesiredCapabilities caps) { ... }
+}
+2. Integration with Cucumber BDD (Hooks)
+Use Cucumber @Before and @After hooks to initialize and quit the drivers for each scenario (or thread, during parallel execution). This ensures isolation and thread safety. 
+java
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import org.openqa.selenium.chrome.ChromeDriver;
+// Import necessary Appium classes and capabilities
+
+public class Hooks {
+
+    @Before("@WebTest") // Tag to run web driver initialization only for relevant scenarios
+    public void initializeWebDriver() {
+        // Example: Initialize Chrome driver
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        WebDriver driver = new ChromeDriver();
+        DriverManager.setWebDriver(driver);
+        // ... (maximize window, set implicit waits, etc.)
+    }
+
+    @Before("@AndroidTest") // Tag to run Appium driver initialization for mobile scenarios
+    public void initializeAppiumDriver() {
+        // Example: Initialize Appium driver with specific capabilities (platformName, deviceName, etc.)
+        // DesiredCapabilities caps = new DesiredCapabilities();
+        // ... set capabilities ...
+        // AppiumDriver driver = new AppiumDriver(new URL("127.0.0.1"), caps);
+        // DriverManager.setAppiumDriver(driver);
+    }
+
+    @After
+    public void tearDown() {
+        // This method automatically determines and quits the correct driver for the current thread
+        DriverManager.quitDriver();
+    }
+}
+3. Using Drivers in Page Object Model (POM)
+In your Page Object classes, retrieve the thread-safe driver instance using the DriverManager.getWebDriver() or DriverManager.getAppiumDriver() static methods.
+java
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+
+public class LoginPage {
+    // No static driver field needed in Page Objects
+
+    public LoginPage() {
+        // Get the current thread's driver instance via DriverManager
+        WebDriver driver = DriverManager.getWebDriver(); 
+        PageFactory.initElements(driver, this);
+    }
+
+    @FindBy(id = "username")
+    private WebElement usernameField;
+    
+    // ... other elements and methods ...
+}
+
+
+Difference between get() and Maps().to() in Selenium?	Both load a new page. get() waits for the page to fully load. Maps().to() also offers back(), forward(), and refresh().
+How will you automate a Windows based application?	Selenium cannot do this. You need specialized tools like AutoIT, Sikuli, or WinAppDriver.
+How to check broken links in Selenium?	1. Get all link elements using findElements(By.tagName("a")). 2. Extract the href attribute. 3. Use an external library (like HttpClient) to send a GET request to the URL. 4. A response code of 400 or higher indicates a broken link.
+Why do we have to use build() and perform() with the action object?	Actions class methods are non-terminal. build() compiles them into a single action, and perform() executes that compiled action.
+Frames	driver.switchTo().frame(0);
+driver.switchTo().frame("frameNameOrID");
+WebElement iframeElement = driver.findElement(By.xpath("//iframe[@title='Payment Gateway']"));
+driver.switchTo().frame(iframeElement);
+driver.switchTo().defaultContent();
+driver.switchTo().parentFrame();
+Window handles	// Store the handle of the parent window
+        String parentWindowHandle = driver.getWindowHandle();
+        System.out.println("Parent Window Handle: " + parentWindowHandle);
+
+        // 2. Perform an action that opens a new window or tab
+        // e.g., driver.findElement(By.id("openNewWindowButton")).click();
+
+        // Use explicit wait to ensure the new window/tab has time to open (Selenium 4+)
+        WebDriverWait wait = new WebDriverWait(driver, java.time.Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.numberOfWindowsToBe(2));
+
+        // 3. Get all the window handles
+        Set<String> allWindowHandles = driver.getWindowHandles();
+        System.out.println("Total Windows Open: " + allWindowHandles.size());
+
+        // 4. Iterate through the handles and switch to the child window
+        for (String handle : allWindowHandles) {
+            if (!handle.equals(parentWindowHandle)) {
+                driver.switchTo().window(handle);
+                break; // Exit the loop once the child window is found and switched to
+            }
+        }
+
+	WebElement selectElement = driver.findElement(By.id("myMultiSelectDropdown"));
+
+Select select = new Select(selectElement);
+
+if (select.isMultiple()) {
+    System.out.println("Dropdown supports multiple selections.");
+
+}
+select.selectByVisibleText("Option 1");
+select.selectByVisibleText("Option 2");
+select.selectByVisibleText("Option 3");
+select.selectByValue("value1");
+select.selectByValue("value2");
+select.selectByIndex(0);
+select.selectByIndex(2);
+select.deselectAll();
+
+java
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
+import java.util.List;
+
+public class DropdownOptionsDemo {
+    public static void main(String[] args) {
+        // Set the path to your ChromeDriver executable
+        System.setProperty("webdriver.chrome.driver", "path/to/your/chromedriver.exe");
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            // Navigate to a page with a multi-select dropdown (example URL)
+            driver.get("https://www.seleniumeasy.com/test/basic-select-dropdown-demo.html"); // Replace with your actual URL
+
+            // Locate the multi-select dropdown element
+            WebElement multiSelectElement = driver.findElement(By.id("multi-select"));
+            Select multiSelect = new Select(multiSelectElement);
+
+            // Verify if the dropdown supports multiple selections
+            if (multiSelect.isMultiple()) {
+                System.out.println("Dropdown supports multiple selections.");
+
+                // Select a few options for demonstration
+                multiSelect.selectByVisibleText("California");
+                multiSelect.selectByValue("Ohio");
+                multiSelect.selectByIndex(5); // Example index
+
+                // Print all available options
+                System.out.println("\n--- All available options ---");
+                List<WebElement> allOptions = multiSelect.getOptions();
+                for (WebElement option : allOptions) {
+                    System.out.println(option.getText());
+                }
+
+                // Print all selected options
+                System.out.println("\n--- All selected options ---");
+                List<WebElement> selectedOptions = multiSelect.getAllSelectedOptions();
+                for (WebElement selectedOption : selectedOptions) {
+                    System.out.println(selectedOption.getText());
+                }
+
+            } else {
+                System.out.println("Dropdown does not support multiple selections.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // Close the browser
+            driver.quit();
+        }
+    }
+}
+
+Selenium 4 features	1. Relative Locators (Friendly Locators)
+Find elements based on their visual position relative to other known elements on the page using methods like above(), below(), toLeftOf(), toRightOf(), and near(). 
+java
+import static org.openqa.selenium.support.locators.RelativeLocator.with;
+
+// Find the email field located above the password field
+WebElement passwordField = driver.findElement(By.id("password"));
+WebElement emailField = driver.findElement(with(By.tagName("input")).above(passwordField));
+
+// Find a 'Cancel' button to the left of the 'Submit' button
+WebElement submitBtn = driver.findElement(By.id("submit"));
+WebElement cancelBtn = driver.findElement(with(By.tagName("button")).toLeftOf(submitBtn));
+Use code with caution.
+
+2. Window and Tab Management
+Selenium 4 introduced a simplified API to create and switch to new tabs or windows in a single step without needing complex window handle logic. 
+java
+// Opens a new blank tab and automatically switches focus to it
+driver.switchTo().newWindow(WindowType.TAB);
+driver.get("https://google.com");
+
+// Opens a new separate browser window and switches to it
+driver.switchTo().newWindow(WindowType.WINDOW);
+driver.get("https://bing.com");
+Use code with caution.
+
+3. Chrome DevTools Protocol (CDP) Integration
+Directly access internal browser features like network emulation, console log monitoring, and geolocation mocking. 
+java
+// Example: Capturing Network Logs
+DevTools devTools = ((ChromeDriver) driver).getDevTools();
+devTools.createSession();
+devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
+
+devTools.addListener(Network.requestWillBeSent(), request -> {
+    System.out.println("Request URL: " + request.getRequest().getUrl());
+});
+driver.get("
+Use code with caution.
+
+java
+https://example.com
+Use code with caution.
+
+java
+");
+Use code with caution.
+
+4. Specific Element Screenshots
+Instead of capturing the entire page and cropping it, you can now take a screenshot of a single WebElement. 
+java
+WebElement logo = driver.findElement(By.id("company-logo"));
+File screenshot = logo.getScreenshotAs(OutputType.FILE);
+FileUtils.copyFile(screenshot, new File("logo_capture.png"));
+Use code with caution.
+
+5. Updated Actions Class
+The Actions class was revamped for more intuitive handling of complex mouse and keyboard sequences. 
+java
+Actions action = new Actions(driver);
+WebElement source = driver.findElement(By.id("draggable"));
+WebElement target = driver.findElement(By.id("droppable"));
+
+// Simplified drag and drop
+action.dragAndDrop(source, target).perform();
+
+// New methods for cleaner code
+action.click(source).perform(); // Moves to element and clicks
+action.contextClick(target).perform(); // Moves and right-clicks
+Use code with caution.
+
+6. W3C WebDriver Standard
+Selenium 4 is fully W3C compliant, meaning it no longer uses the JSON Wire Protocol. This results in more stable tests across browsers and requires using Options classes instead of DesiredCapabilities. 
+java
+// Modern way to set browser preferences
+ChromeOptions options = new ChromeOptions();
+options.addArguments("--headless=new");
+options.setAcceptInsecureCerts(true);
+WebDriver driver = new ChromeDriver(options);
+Use code with caution.
+Selenim grid	1. Prerequisites
+Ensure you have Java installed and download the standalone Selenium Server JAR file (e.g., selenium-server-4.x.x.jar) from the official Selenium website.
+2. Setting Up the Grid (Command Line)
+You need to run two separate commands in different command prompts/terminals.
+A. Start the Hub
+The hub is the central point that manages test sessions.
+bash
+java -jar selenium-server-4.x.x.jar hub
+Use code with caution.
+By default, the hub runs on http://localhost:4444/.
+B. Start a Node
+The node is the machine where the actual browser instance will run. It registers with the hub.
+bash
+java -jar selenium-server-4.x.x.jar node --hub http://localhost:4444/
+Use code with caution.
+You can start multiple nodes on different machines or the same machine to run tests in parallel.
+3. Configuring the Java Code
+In your automation framework (e.g., a TestNG test using the Page Object Model), you need to switch from a local WebDriver (like ChromeDriver) to a RemoteWebDriver that points to your hub's URL.
+java
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
+public class RemoteDriverFactory {
+
+    public static WebDriver getRemoteDriver(String browserName) throws MalformedURLException {
+        WebDriver driver;
+        URL hubUrl = new URL("http://localhost:4444/");
+        
+        if (browserName.equalsIgnoreCase("chrome")) {
+            ChromeOptions options = new ChromeOptions();
+            // Optional capabilities, like running headless
+            // options.addArguments("--headless"); 
+            
+            driver = new RemoteWebDriver(hubUrl, options);
+            
+        } else if (browserName.equalsIgnoreCase("firefox")) {
+            // Use FirefoxOptions for configuration
+            DesiredCapabilities cap = new DesiredCapabilities();
+            cap.setBrowserName("firefox");
+            cap.setPlatform(Platform.LINUX); // Or WINDOWS/MAC
+            
+            driver = new RemoteWebDriver(hubUrl, cap);
+        } else {
+            throw new IllegalArgumentException("Browser " + browserName + " not supported.");
+        }
+        
+        return driver;
+    }
+}
+Use code with caution.
+4. Running Parallel Tests (Optional via TestNG)
+To leverage the grid fully, configure your testng.xml file to run tests in parallel:
+xml
+<!DOCTYPE suite SYSTEM "https://testng.org" >
+<suite name="SeleniumGridSuite" parallel="tests" thread-count="2">
+    <test name="ChromeTest">
+        <parameter name="browser" value="chrome""")/>>
+        <classes>
+            <class name="com.example.tests.MyAwesomeTest""")/>>
+        </classes>
+    </test>
+    <test name="FirefoxTest">
+        <parameter name="browser" value="firefox""")/>>
+        <classes>
+            <class name="com.example.tests.MyAwesomeTest""")/>>
+        </classes>
+    </test>
+</suite>
+Use code with caution.
+Would you like help setting this up inside your existing Cucumber framework?
+
+
+
+Question	Short Answer
+What is a Test Plan?	A document that describes the scope, approach, resources, and schedule of all testing activities. It is a roadmap for the testing process.
+Explain the bug life cycle?	New $\rightarrow$ Assigned $\rightarrow$ Open/Fixed $\rightarrow$ Tested (Retest) $\rightarrow$ Verified/Closed or Reopened (if failed retest) or Deferred (if low priority).
+Difference between smoke and sanity tests?	Smoke Test (Build Verification Test): Shallow and wide; ensures core functionality works (system stability). Sanity Test: Narrow and deep; ensures newly added/fixed functionality works as expected (rationality).
+Difference between regression and retesting?	Retesting: Re-running failed test cases to ensure the defect is fixed. Regression Testing: Testing existing, unchanged parts of the application to ensure changes haven't introduced new bugs.
+Difference between functional and regression testing?	Functional: Tests a specific feature against requirements. Regression: Tests the entire system (or critical paths) to ensure stability after any code change.
+Difference between severity and priority?	Severity is the impact of the bug on the system (e.g., critical, major, minor). Priority is the urgency with which the bug needs to be fixed (e.g., high, medium, low).
+Difference between Test Plan and Test Strategy?	Test Strategy is the high-level approach/vision for the entire testing process (usually part of the Test Plan). Test Plan is the detailed document on how to implement the strategy for a specific project/phase.
+Difference between Boundary Value Analysis (BVA) and Equivalence Partitioning (EP)?	Both are black-box techniques. EP divides input data into partitions and picks one test case per partition. BVA focuses on testing the values at the boundaries of those partitions (where errors are often found).
+Difference between white box and black box testing?	White Box: Tests the internal structure/code (requires coding knowledge). Black Box: Tests the functionality based on requirements (no knowledge of internal code needed).
+What is exploratory testing?	Simultaneous learning, test design, and test execution. The tester explores the application without pre-written test cases to find defects.
+What is adhoc testing?	Informal, non-structured testing performed randomly, often without documentation or planning.
+What is deferred bug?	A bug that is acknowledged but scheduled to be fixed in a future release due to low priority or lack of time/resources in the current cycle.
+How will you decide what tests to automate?	Prioritize tests that are repetitive, time-consuming if manual, need to be run across multiple configurations/browsers, are critical for core functionality (Smoke/Regression), and have stable requirements.
+When do you decide to stop the testing?	When test coverage criteria is met, exit criteria is satisfied (e.g., remaining bugs are deferred/low priority), budget/time runs out, or the risk is acceptable.
+What is the next step if a developer rejects the Open defect?	The QA should discuss with the developer/Lead, provide evidence (screenshots/logs), and if disagreement persists, escalate the issue for a final decision by the QA Manager or Product Owner (Bug Triage Meeting).
+How will you decide this test case is feasible or a good candidate for automation?	Feasible if it is a high-impact, frequently executed test case with predictable outcomes. Good candidate if it has stable logic, clear verification points, and is part of the regression suite.
+
+
+Question	Short Answer
+Difference between REST and SOAPUI.	REST (Representational State Transfer) is an architectural style, typically using JSON/XML over standard HTTP methods. SOAP (Simple Object Access Protocol) is a protocol, strictly using XML and often relying on WSDL (Web Services Description Language).
+Method in REST.	GET (retrieve data), POST (create data), PUT (update/replace entire resource), PATCH (update/modify partial resource), DELETE (remove resource).
+Difference between PUT and PATCH call.	PUT replaces the entire resource with the new payload. PATCH applies a partial modification to a resource.
+What is difference between Authorization and Authentication?	Authentication is verifying who you are (e.g., username/password). Authorization is verifying what you are allowed to do (permissions) after you have been authenticated.
+What are the API status codes, you have come across?	200 OK (Success), 201 Created (Resource created), 204 No Content (Success, but no body), 400 Bad Request (Client error), 401 Unauthorized (Authentication failure), 403 Forbidden (Authorization failure), 404 Not Found (Resource doesn't exist), 500 Internal Server Error (Server error).
+What is difference between OAuth1.0 and OAuth2.0?	OAuth 2.0 is an authorization framework, not a protocol, offering different grant types (flows) and is simpler for client developers than OAuth 1.0. OAuth 1.0 is more complex and less commonly used now.
+How do you handle dynamic payloads in API?	Use Payload Templates (JSON/XML files) and inject dynamic values (like timestamps or UUIDs) at runtime using libraries/tools like Rest Assured or Postman scripting.
+How do you capture specific responses value and pass to another request?	In the first response, parse the JSON/XML body to extract the required value (e.g., id or token) and then store it in a variable. Use that variable in the header or body of the subsequent request.
+Sample restassred code	import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+
+public class RestApiAutomationTest {
+
+    @BeforeClass
+    public static void setup() {
+        // Set the base URI for all tests in this class
+        RestAssured.baseURI = "https://reqres.in";
+    }
+
+    @Test
+    public void testApiWithParamsAndAssertions() {
+        // Define the path variable and query parameter values
+        int userId = 2;
+        int pageNumber = 1;
+
+        // Perform the GET request with path and query parameters
+        Response response = given()
+            .pathParam("userId", userId) // Set path parameter
+            .queryParam("page", pageNumber) // Set query parameter
+            .when()
+            .get("/api/users/{userId}"); // Use placeholders in the URL
+
+        // 1. Basic Assertions (using Hamcrest matchers directly in 'then()')
+        response.then()
+            .statusCode(200) // Verify HTTP status code is 200
+            .body("data.id", equalTo(userId)) // Assert specific fields using GPath syntax
+            .body("data.email", equalTo("janet.weaver@reqres.in"))
+            .body("data.first_name", equalTo("Janet"))
+            .body("data", hasKey("avatar")); // Check for existence of a key
+
+        // 2. Advanced Parsing and Assertion (using JsonPath class)
+        // Extract the response body as a String to use with JsonPath
+        String jsonResponseString = response.asString();
+        JsonPath jsonPath = new JsonPath(jsonResponseString); // Create a JsonPath object
+
+        // Extract specific field values using JsonPath methods
+        String firstName = jsonPath.getString("data.first_name");
+        String lastName = jsonPath.getString("data.last_name");
+        int extractedId = jsonPath.getInt("data.id");
+
+        // Use TestNG/JUnit assertions for more complex logic
+        Assert.assertEquals(firstName, "Janet", "First name should match");
+        Assert.assertEquals(lastName, "Weaver", "Last name should match");
+        Assert.assertEquals(extractedId, userId, "User ID should match");
+        
+        System.out.println("API Test Successful!");
+    }
+}
+	import java.util.Map;
+
+public class JsonParserExample {
+    public static void main(String[] args) {
+        // 1. Get the response from the API
+        String jsonResponse = RestAssured
+                .get("https://jsonplaceholder.typicode.com")
+                .asString();
+
+        // 2. Initialize JsonPath
+        JsonPath jsonPath = new JsonPath(jsonResponse);
+
+        // 3. Parse the array into a List of Maps
+        // Use "$" to refer to the root array, or provide a specific path like "data"
+        List<Map<String, Object>> users = jsonPath.getList("$");
+
+        // 4. Access data from the first object in the array
+        Map<String, Object> firstUser = users.get(0);
+        System.out.println("User Name: " + firstUser.get("name"));
+        
+        // If your JSON has a nested array (e.g., "address"), you can parse that too
+        Map<String, Object> address = (Map<String, Object>) firstUser.get("address");
+        System.out.println("City: " + address.get("city"));
+    }
+}
+
+
+{
+  "status": "success",
+  "data": {
+    "users": [
+      { "id": 1, "name": "Alice" },
+      { "id": 2, "name": "Bob" }
+    ]
+  }
+}
+
+
+List<Map<String, Object>> usersList = jp.getList("data.users");
+
+        // 4. Access the first map in that list
+        Map<String, Object> firstUser = usersList.get(0);
+        
+        System.out.println("User ID: " + firstUser.get("id"));
+        System.out.println("User Name: " + firstUser.get("name"));
+
+
+Map<String, Object> fullResponse = jp.getMap("$");
+Map<String, Object> dataPart = (Map<String, Object>) fullResponse.get("data");
+List<Map<String, Object>> users = (List<Map<String, Object>>) dataPart.g
+
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class User {
+    public int id;
+    public String name;
+    // Getters and Setters recommended
+}
+
+
+  List<User> users = jp.getList("data.users", User.class);
+
+
+for (User user : users) {
+            System.out.println("ID: " + user.id + ", Name: " + user.name);
+        }
+
+Symbol	Meaning
+$	The Root element (where the JSON begins) [1].
+.	Child operator (used to navigate into an object) [1].
+..	Deep scan (finds a field name anywhere in the document) [2, 3].
+*	Wildcard (matches all elements) [1].
+
+{
+  "store": {
+    "book": [
+      { "category": "reference", "price": 10 },
+      { "category": "fiction", "price": 20 }
+    ]
+  },
+  "status": "active"
+}
+
+// Gets the entire JSON as a Map
+Map<String, ?> root = jsonPath.get("$"); 
+
+// Gets the root status
+String status = jsonPath.get("$.status"); 
+List<Map<String, ?>> books = jsonPath.get("store.book");List<Float> allPrices = jsonPath.get("..price"); 
+List<Object> allItems = jsonPath.get("store.book[*]");
+List<String> allCategories = jsonPath.get("store.book.category");
+
+
+•	findAll { condition }: Returns all elements that match.
+•	find { condition }: Returns only the first element that matches.
+•	it: Refers to the "current item" being evaluated in the array.
+
+
+{
+  "store": {
+    "books": [
+      { "title": "Java Basics", "price": 20, "category": "education" },
+      { "title": "Fast Cars", "price": 50, "category": "hobby" },
+      { "title": "Spring Boot", "price": 35, "category": "education" }
+    ]
+  }
+}
+
+// Returns a List of Maps (or List of POJOs if you specify the class)
+List<Map<String, ?>> expensiveBooks = jp.getList("store.books.findAll { it.price > 30 }");
+
+Map<String, ?> firstEduBook = jp.get("store.books.find { it.category == 'education' }");
+
+// Returns ["Java Basics", "Spring Boot"]
+List<String> eduTitles = jp.getList("store.books.findAll { it.category == 'education' }.title");
+// Find expensive education books
+List<Map<String, ?>> results = jp.getList("store.books.findAll { it.price > 15 && it.category == 'education' }");
+
+public class User {
+    private String name;
+    private String job;
+
+    public User(String name, String job) {
+        this.name = name;
+        this.job = job;
+    }
+
+    // Getters and Setters are essential for serialization
+    public String getName() { return name; }
+    public String getJob() { return job; }
+}
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import static io.restassured.RestAssured.*;
+
+public class PostPojoExample {
+    public void createUser() {
+        // 1. Create an instance of your POJO
+        UserPayload user = new UserPayload("John Doe", "QA Automation Engineer");
+
+        // 2. Pass the object directly into .body()
+        given()
+            .baseUri("https://reqres.in")
+            .contentType(ContentType.JSON) // Mandatory for serialization
+            .body(user)                    // RestAssured converts 'user' to JSON
+        .when()
+            .post("/api/users")
+        .then()
+            .statusCode(201)
+            .log().all();
+    }
+}
+
+import io.restassured.http.ContentType;
+import java.util.ArrayList;
+import java.util.List;
+import static io.restassured.RestAssured.given;
+
+public class PostArrayExample {
+    public void createMultipleUsers() {
+        // 1. Create a List of your POJO
+        List<User> userList = new ArrayList<>();
+        userList.add(new User("Alice", "Developer"));
+        userList.add(new User("Bob", "Manager"));
+
+        // 2. Pass the List directly into .body()
+        given()
+            .contentType(ContentType.JSON)
+            .body(userList) // Serializes the entire List to a JSON Array
+        .when()
+            .post()
+
+        .then()
+            .statusCode(201)
+            .log().all();
+    }
+}
+ 
+
+
+
+Question	Short Answer
+Lifecycle of Maven?	The main lifecycle is default (clean, validate, compile, test, package, verify, install, deploy). Others are clean and site.
+Use of Maven surefire plugin?	The Surefire Plugin is used to execute test cases during the test phase of the build lifecycle.
+What is the use of pom.xml?	The Project Object Model (POM) file is the core configuration for Maven. It contains project details, dependencies, plugins, goals, and build profiles.
+How will you handle dependencies in Maven at run time?	Dependencies are downloaded and stored in the local repository during the compile phase. At runtime, they are picked up from the local repository and added to the classpath by the JVM.
+What is the purpose of version control tool?	To manage changes to source code over time, allowing multiple developers to collaborate and revert to previous versions if needed. Git is the most common.
+What is difference between group id and artifact id?	groupId: Unique identifier for the project/organization (e.g., com.mycompany.project). artifactId: Unique identifier for the JAR/project module itself (e.g., web-automation-framework).
+How and when is Jenkins is used in your Automation?	When: Used after code commit to Continuously Integrate (CI), build, and run automation tests. How: A Jenkins job is configured to pull code from Git, build it using Maven, execute the TestNG/Cucumber suite, and publish reports.
+
+Question	Short Answer
+How many suits can be there in TestNG, what if I run all the suits?	You can define multiple <suite> tags in one testng.xml. Running the XML file will execute all suites defined within it sequentially.
+Syntax to perform parallel testing in TestNG and what do you write in <suite> tag also what do you mention in double quotes like parallel = " "?	In the <suite> tag, set the attribute parallel to either "methods", "classes", or "tests". E.g., <suite name="MySuite" parallel="tests" thread-count="4">.
+What is invocationCount in TestNG?	An attribute used in the @Test annotation to specify how many times a test method should be executed consecutively.
+Explain retry analyzer?	A TestNG listener implementation that allows you to automatically re-run failed test cases a specified number of times, improving test reliability against flaky failures.
+What is Cucumber, and why is it used in BDD?	Cucumber is a tool that supports Behavior Driven Development (BDD). It allows defining application behavior in plain English (Gherkin syntax), making it readable and understandable by all stakeholders (non-technical too).
+What are Gherkin keywords, and can you name some of them?	Keywords used to define scenarios. They include: Feature, Scenario, Given (pre-condition), When (action), Then (outcome/assertion), And, and But.
+Difference between Scenario and Scenario Outline?	Scenario runs with a single, fixed set of data. Scenario Outline is used to run the same scenario logic multiple times with different sets of data, which are supplied in an Examples table.
+What are hooks in cucumber, and how are they used?	Hooks are blocks of code that run before or after a scenario or a step. @Before runs before each scenario; @After runs after each scenario. Used for setup (e.g., browser launch) and teardown (e.g., browser quit).
+What is the role of the Runner class in Cucumber?	The Runner class is a JUnit test class that acts as the bridge between the Cucumber feature files and the step definition files. It is where you configure execution options (features path, glue code, tags, etc.).
+	<dependencies>
+    <!-- Extent Reports Core -->
+    <dependency>
+        <groupId>com.aventstack</groupId>
+        <artifactId>extentreports</artifactId>
+        <version>5.1.1</version>
+    </dependency>
+    <!-- Grasshopper Cucumber Adapter for Extent Reports -->
+    <dependency>
+        <groupId>tech.grasshopper</groupId>
+        <artifactId>extentreports-cucumber7-adapter</artifactId>
+        <version>1.14.0</version>
+    </dependency>
+</dependencies>
+
+@CucumberOptions(
+    features = "src/test/resources/features",
+    glue = "com.example.stepdefinitions",
+    plugin = {
+        "pretty", 
+        "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:" 
+    }
+)
+public class TestRunner extends AbstractTestNGCucumberTests { }
+
+
+properties
+# Enable Spark (HTML) Reporter
+extent.reporter.spark.start=true
+extent.reporter.spark.out=target/SparkReport/Spark.html
+
+# Optional: Add System Info
+systeminfo.os=Windows
+systeminfo.env=Staging
+
+# Optional: Screenshot configuration
+screenshot.dir=target/
+screenshot.rel.path=..
+
+java
+import io.cucumber.java.After;
+import io.cucumber.java.Scenario;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+
+public class Hooks {
+    @After
+    public void tearDown(Scenario scenario) {
+        if (scenario.isFailed()) {
+            // Take screenshot and attach it to the Extent Report
+            final byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+            scenario.attach(screenshot, "image/png", scenario.getName());
+        }
+    }
+}
+
+Question	Short Answer
+What is an agile methodology?	An iterative and incremental approach to software development focused on delivering value quickly, responding to change, and collaboration between cross-functional teams and customers.
+What is the scrum and who is your scrum master?	Scrum is a lightweight, iterative framework for managing complex work. The Scrum Master is the servant-leader responsible for promoting and supporting Scrum, removing impediments, and ensuring the team adheres to Scrum practices.
+Ceremonies followed in Agile methodology?	Sprint Planning, Daily Scrum/Stand-up, Sprint Review (Demo), and Sprint Retrospective.
+What is velocity in sprint?	A measure of the amount of work (e.g., story points) a development team can complete during a single Sprint. It helps the team estimate future work.
+What is backlog in Scrum methodology?	A constantly evolving, ordered list of everything that might be needed in the product. The Product Backlog is managed by the Product Owner. The Sprint Backlog is the subset of items selected for the current sprint.
+When do you automate in current sprint or next sprint?	Ideally, automation should start in the current sprint as soon as the manual test case is stable and the feature is partially complete. Leaving it until the next sprint can create automation debt.
+
+Question	Short Answer
+How you will be an asset to the team?	I will be an asset by building a robust, scalable, and maintainable automation framework, introducing best practices (e.g., Page Object Model, data-driven design), and focusing on high-value regression testing, which reduces manual effort and accelerates releases.
+Why you are looking for a change?	Focus on growth. (e.g., "I've gained valuable experience here, but I'm seeking a role with more technical complexity and broader scope, specifically in [mention area: e.g., cloud-based testing or API automation], to further challenge my skills.") Never speak negatively about your current employer.
+Suppose if we give manual testing for six months or one year what will you do?	I would accept it as an opportunity to gain deep domain knowledge and build a stronger foundation for future automation. I would use that time to design excellent test cases and identify the best candidates for automation once the opportunity arises.
+Failures in your work life.	Choose a failure that was a technical challenge, not a personal or team conflict. Describe the failure, what you learned from it (e.g., the need for better collaboration, deep-diving into a technology), and how you applied that lesson successfully later.
+As Lead, how do you define quality of product before releases?	Quality is defined by meeting the agreed-upon Definition of Done (DoD), achieving high test coverage (both functional and automation), maintaining a low defect escape rate (minimal critical bugs in production), and ensuring key performance metrics (like load time) are met.
+As QA, where do you see yourself after 3 years?	I see myself transitioning into a Senior Automation Lead or SDET (Software Development Engineer in Test), leading a team, designing the overall testing strategy for complex projects, and driving the adoption of advanced testing techniques like performance or security automation.
+Which bugs would you prioritize after a full regression test?	Prioritize bugs that: 1. Suggest functionality has regressed (High Priority, High Severity, as they broke existing features). 2. Block key workflows/feature testing (High Priority, often High Severity). 3. Are security or critical user-facing issues.
+
+Program	Conceptual Approach
+Swap string without 3rd variable?	Append String B to String A. Then, use substring() to extract the original String B (length of B) from the end of String A and assign it to B. Finally, use substring() to extract the original String A (remaining part) and assign it back to A.
+public class StringSwap {
+    public static void swap(String a, String b) {
+        System.out.println("Before swap: A = " + a + ", B = " + b);
+        
+        // 1. Concatenate both strings and store in A
+        a = a + b; // A now holds "HelloWorld"
+
+        // 2. Extract original A from the combined string and store in B
+        // (A.length() - B.length()) gives the length of original A
+        b = a.substring(0, a.length() - b.length()); // B now holds "Hello"
+
+        // 3. Extract original B from the combined string and store in A
+        a = a.substring(b.length()); // A now holds "World"
+
+        System.out.println("After swap: A = " + a + ", B = " + b);
+    }
+
+    public static void main(String[] args) {
+        String str1 = "Hello";
+        String str2 = "World";
+        swap(str1, str2);
+    }
+}
+Duplicates in a String?	Use a HashMap<Character, Integer> to store character counts. Iterate through the string; if the character exists in the map, increment its count. Finally, iterate over the map and print characters with a count $> 1$.
+import java.util.HashMap;
+import java.util.Map;
+
+public class FindDuplicates {
+    public static void find(String str) {
+        Map<Character, Integer> charCounts = new HashMap<>();
+        char[] chars = str.toLowerCase().toCharArray(); // Convert to lower case for case-insensitivity
+
+        for (char c : chars) {
+            if (c != ' ') { // Ignore spaces
+                charCounts.put(c, charCounts.getOrDefault(c, 0) + 1);
+            }
+        }
+
+        System.out.print("Duplicate characters: ");
+        for (Map.Entry<Character, Integer> entry : charCounts.entrySet()) {
+            if (entry.getValue() > 1) {
+                System.out.print(entry.getKey() + " ");
+            }
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        find("Programming is fun");
+    }
+}
+How to find the length of the string without using length?	Convert the string to a character array using toCharArray() and iterate through the array, incrementing a counter until the loop ends.
+public class CustomLength {
+    public static int getStringLength(String str) {
+        int length = 0;
+        
+        // Convert to character array and iterate until the end
+        // A try-catch block is a clean way to find the end without knowing the size
+        try {
+            for (char c : str.toCharArray()) {
+                length++;
+            }
+        } catch (Exception e) {
+            // No action needed, this is just to complete the iteration
+        }
+        
+        return length;
+    }
+
+    public static void main(String[] args) {
+        String s = "Interview";
+        System.out.println("Length of string '" + s + "' is: " + getStringLength(s));
+    }
+}
+Reverse string without using reverse function?	Convert the string to a character array. Iterate over the array from the last index to the first index, appending each character to a new StringBuilder or string.
+public class ReverseString {
+    public static String reverse(String str) {
+        char[] chars = str.toCharArray();
+        StringBuilder reversed = new StringBuilder();
+
+        // Iterate backwards from the last character
+        for (int i = chars.length - 1; i >= 0; i--) {
+            reversed.append(chars[i]);
+        }
+        return reversed.toString();
+    }
+
+    public static void main(String[] args) {
+        String original = "Selenium";
+        System.out.println("Reversed string: " + reverse(original));
+    }
+}
+
+Write code to print the Fibonacci series?	Initialize two variables, a=0 and b=1. Print them. Use a loop to calculate the next number c = a + b, then update a = b and b = c.
+public class FibonacciSeries {
+    public static void printFibonacci(int count) {
+        int n1 = 0;
+        int n2 = 1;
+        
+        System.out.print("Fibonacci Series up to " + count + " terms: " + n1 + ", " + n2);
+        
+        for (int i = 2; i < count; i++) {
+            int n3 = n1 + n2;
+            System.out.print(", " + n3);
+            
+            // Shift values for the next iteration
+            n1 = n2;
+            n2 = n3;
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        printFibonacci(8);
+    }
+}
+Write code to check if a number is palindrome?	Store the original number. Use a while loop to reverse the number (by taking the modulo and dividing). Compare the reversed number with the original number.
+public class NumberPalindrome {
+    public static boolean isPalindrome(int number) {
+        int original = number;
+        int reversed = 0;
+
+        while (number > 0) {
+            int digit = number % 10; // Get the last digit
+            reversed = reversed * 10 + digit; // Append it to reversed number
+            number = number / 10; // Remove the last digit
+        }
+        
+        return original == reversed;
+    }
+
+    public static void main(String[] args) {
+        int num1 = 121;
+        int num2 = 123;
+        System.out.println(num1 + " is Palindrome: " + isPalindrome(num1));
+        System.out.println(num2 + " is Palindrome: " + isPalindrome(num2));
+    }
+}
+Write a Java code to identify, if the pair of strings are an Anagram or not?	Sort both strings (e.g., convert to char array, sort, convert back to string). If the sorted strings are equal and have the same length, they are anagrams.
+import java.util.Arrays;
+
+public class AnagramCheck {
+    public static boolean isAnagram(String s1, String s2) {
+        // 1. Remove spaces and convert to lower case
+        String cleanS1 = s1.replaceAll("\\s", "").toLowerCase();
+        String cleanS2 = s2.replaceAll("\\s", "").toLowerCase();
+
+        // 2. Check length (must be equal)
+        if (cleanS1.length() != cleanS2.length()) {
+            return false;
+        }
+
+        // 3. Convert to char arrays and sort
+        char[] array1 = cleanS1.toCharArray();
+        char[] array2 = cleanS2.toCharArray();
+        
+        Arrays.sort(array1);
+        Arrays.sort(array2);
+
+        // 4. Compare the sorted arrays
+        return Arrays.equals(array1, array2);
+    }
+
+    public static void main(String[] args) {
+        String strA = "listen";
+        String strB = "silent";
+        System.out.println(strA + " and " + strB + " are Anagrams: " + isAnagram(strA, strB));
+    }
+}
+Write a code to get Highest number using array.	Initialize a variable max to the first element of the array. Iterate through the rest of the array. If the current element is greater than max, update max to the current element.
+public class FindHighestNumber {
+
+    /**
+     * Finds the maximum number in an integer array by iterating through the elements.
+     * * @param arr The integer array to search through.
+     * @return The largest integer found in the array.
+     * @throws IllegalArgumentException if the array is null or empty.
+     */
+    public static int findMax(int[] arr) {
+        // 1. Handle edge cases: null or empty array
+        if (arr == null || arr.length == 0) {
+            // In a real-world scenario, you might return Integer.MIN_VALUE or throw an exception.
+            throw new IllegalArgumentException("The array cannot be null or empty.");
+        }
+
+        // 2. Initialize the maximum value variable
+        // Start by assuming the first element is the largest.
+        int max = arr[0]; 
+
+        // 3. Iterate through the rest of the array (starting from the second element at index 1)
+        for (int i = 1; i < arr.length; i++) {
+            // 4. Compare the current element with the current maximum
+            if (arr[i] > max) {
+                // If the current element is larger, update the maximum
+                max = arr[i];
+            }
+        }
+        
+        return max;
+    }
+
+    public static void main(String[] args) {
+        int[] numbers = {45, 10, 99, 5, 12, 70};
+        
+        try {
+            int highestNumber = findMax(numbers);
+            System.out.println("The given array is: " + java.util.Arrays.toString(numbers));
+            System.out.println("The highest number in the array is: " + highestNumber); // Output: 99
+
+            // Example with negative numbers
+            int[] negativeNumbers = {-5, -10, -2, -8};
+            System.out.println("\nAnother array is: " + java.util.Arrays.toString(negativeNumbers));
+            System.out.println("The highest number in the array is: " + findMax(negativeNumbers)); // Output: -2
+            
+            // Example of edge case handling
+            // int[] emptyArray = {};
+            // findMax(emptyArray); // This will throw an IllegalArgumentException
+            
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+}
+
+
+
+
+Question	Short Answer
+What is Mobile Automation Testing?	Using automation tools (like Appium) and scripts to test mobile applications (Native, Hybrid, or Web) on real devices or emulators/simulators.
+What is Appium?	An open-source automation tool used for Native, Hybrid, and Mobile Web applications. It's cross-platform (Android and iOS) and uses the standard Selenium WebDriver protocol.
+What is the difference between Native, Hybrid, and Mobile Web Apps?	Native: Built using platform-specific languages (e.g., Kotlin/Swift); accessed via app store. Hybrid: Built using web technologies (HTML/CSS/JS) and wrapped in a native container (e.g., using Cordova/Ionic); accessed via app store. Mobile Web: Runs purely in the mobile browser (e.g., Chrome/Safari).
+Why is Appium preferred?	It is cross-platform (one codebase for both Android/iOS), supports standard programming languages (Java, Python, etc.), and does not require application source code (operates as a "black box").
+What are Desired Capabilities?	A set of key-value pairs sent to the Appium server to define the required test platform, device, and application parameters (e.g., deviceName, platformName, appPackage, appActivity).
+What is the difference between an Emulator and a Simulator?	Emulator (Android): A hardware/software copy of the mobile device. It translates processor instruction sets, making it slower but more realistic. Simulator (iOS): A software environment that mimics the OS but doesn't mimic hardware/CPU, making it faster but less accurate.
+What is the difference between AppPackage and AppActivity?	AppPackage: The unique technical ID of the application (e.g., com.whatsapp). AppActivity: The specific entry point or screen within the app that should be launched initially.
+How to handle gestures in Appium?	Using the TouchAction or MultiTouchAction classes, or more recently, using the W3C WebDriver Actions protocol for actions like tap, swipe, scroll, and longPress.
+How do you scroll/swipe in a mobile app?	By calculating the start and end coordinates (e.g., 90% Y to 20% Y for an upward scroll) and executing a press, moveTo, and release action using the Actions API.
+What is a "context" in Appium?	The view or environment the automation is interacting with. NATIVE_APP (for native elements) and WEBVIEW_... (for hybrid/web content) are the most common contexts.
+How do you switch from Native to Web View?	Use the command: driver.context("WEBVIEW_com.example.app");. You typically get the list of available contexts first using driver.getContextHandles().
+What are the common locators in Appium?	Accessibility ID (preferred for cross-platform), id, xpath, className, and UIAutomator (Android) or XCUITest (iOS) specific locators.
+What tools are used to inspect mobile elements?	Appium Desktop Inspector (works for both platforms), UI Automator Viewer (Android SDK tool), and Appium Studio.
+-=-----How do you handle OS system alerts (e.g., Permissions)?	Appium can generally handle these natively, often using the same methods as Selenium Alerts (driver.switchTo().alert().accept() or checking the element using Accessibility IDs).
+Mention some challenges in Mobile Automation.	Fragmentation (many devices/OS versions), Flakiness (unreliable tests due to network or timing), Gestures, Interacting with non-app events (calls/notifications), and Test environment setup (ADB/Xcode).
+What is ADB?	Android Debug Bridge. A versatile command-line tool that lets you communicate with an emulator or connected Android device. Used for installing/uninstalling apps, reading logs, and taking screenshots.
+What is the purpose of noReset and fullReset capabilities?	noReset=true: Prevents the app state from being cleared between sessions (faster execution). fullReset=true: Uninstalls and reinstalls the app, clearing all data (ensures a clean start, but slow).
+
+
+Question	Answer
+Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+
+You may assume that each input would have exactly one solution, and you may not use the same element twice.
+
+You can return the answer in any order.
+
+ 
+
+Example 1:
+
+Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].	import java.util.stream.Collectors;
+import java.util.*;
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        List<Integer> numsList=IntStream.of(nums).boxed().collect(Collectors.toList());
+        for(int k:nums)
+        {
+          int complement =target - k;
+          if(numsList.contains(complement)){
+            System.out.println(k +" "+numsList.indexOf(k));
+            System.out.println(complement+" "+numsList.indexOf(complement));
+            if(numsList.indexOf(k)!=numsList.lastIndexOf(complement)){
+            return new int[]{numsList.indexOf(k),numsList.lastIndexOf(complement)};
+            }
+          }
+        }
+       return null; 
+    }
+}
+
+	
+What is Appium?	An open-source automation tool used for Native, Hybrid, and Mobile Web applications. It's cross-platform (Android and iOS) and uses the standard Selenium WebDriver protocol.
+CICD	
+
+
+	DSA
+Time complexity of program	 
+Space complexity	 
+
+
+
+
+Programs	
+
+•	Two Sum (HashMap/Arrays)
+•	Valid Parentheses (Stacks - Classic for SDET)
+•	Reverse String / Reverse Words in a String (Two Pointers)
+•	Longest Substring Without Repeating Characters (Sliding Window)
+•	First Unique Character in a String (HashMap)
+•	Valid Palindrome (String manipulation)
+•	Merge Sorted Arrays (Arrays)
+•	Linked List Cycle (Fast & Slow pointers)
+•	Binary Search (Basic search logic)
+•	Number of Islands (DFS/BFS - Tests recursion/traversal)
+•	Top K Frequent Elements (Heap/HashMap)
+•	Move Zeroes (Array pointer logic)
+
+Algorithms	 
+
+	Leadership & Team Management
+•	Mentorship: "I focus on identifying skill gaps and providing actionable feedback. For example, I mentored a junior SDET struggling with asynchronous Java code. I broke their tasks into manageable chunks and held twice-weekly collaboration sessions. Within a month, their productivity increased by 85%, and they began delivering sprint tasks on time."
+•	Conflict Resolution: "I prioritize resolving disagreements directly and promptly through open dialogue. If a developer disagrees with a bug report, I schedule a meeting to understand their perspective, review the requirements together, and focus on the impact on the business or user rather than who is right."
+•	Performance: "I use a proactive approach by first identifying the root cause in a one-on-one meeting. If it's a workload issue, I help them prioritize using project management tools. If it's a skill gap, I assign smaller, high-confidence tasks to build their momentum while providing targeted training."
+•	Change Management: "I introduce new concepts by first presenting data-backed evidence of the benefits. For a new CI/CD pipeline, I would run a small pilot, document the reduction in feedback loops (e.g., from hours to minutes), and then involve the team in the rollout to ensure their feedback is integrated." 
+ Indeed +5
+Testing Strategy & Impact
+•	Risk-Based Testing: "I prioritize functionalities based on their complexity, frequency of use, and potential business impact. High-risk features (like payment gateways) receive full automation and manual smoke tests, while lower-risk cosmetic items are deferred if time is critical."
+•	ROI of Automation: "Success is measured by quantitative metrics like the reduction in regression execution time, the number of 'critical' bugs found by automation before they hit staging, and the overall increase in release frequency."
+•	Ambiguity: "I start by communicating with product managers to clarify the core user intent. I then design a flexible framework using common programming languages and technology that can easily be refactored as requirements solidify."
+•	Quality Ownership: "If a major bug slips, I lead a root cause analysis to see if it was a gap in the test suite or a missing environment parity. We then implement a 'preventative' test case and update the CI pipeline to ensure that specific scenario is never missed again." 
+ Indeed +5
+Project & Resource Management
+•	Prioritization: "I prioritize based on severity and business impact. A failing test for a critical path like 'Checkout' is fixed immediately, whereas a failing UI alignment test on a secondary page can be noted as a known issue for the next patch."
+•	Resource Allocation: "I estimate effort by breaking the project into phases: framework design, environment setup, and script development. I also factor in 'maintenance debt'—usually 20% of the total time—to handle future changes."
+•	Cross-functional Collaboration: "I work closely with DevOps to integrate automated tests into the build pipeline for fast feedback. By aligning with Product Managers on 'definition of done,' we ensure quality is a shared responsibility, not just a bottleneck at the end." 
+ Indeed +3
+Career & Culture Fit
+•	Role Understanding: "I chose SDET because I enjoy the challenge of building tools that make the entire development lifecycle more efficient. It allows me to combine my passion for coding with a strategic view of product quality."
+•	Adaptability: "I am comfortable with both independent work and team collaboration. When priorities shift, I assess my emotions, regroup with stakeholders, and pivot the automation focus to the new high-value features immediately."
+•	Self-Improvement: "I stay current by following industry blogs and contributing to open-source projects. Recently, I’ve been exploring how AI-driven testing can optimize test data generation and maintenance.
+
+
+
+To align perfectly with J.P. Morgan’s (JPMC) specific culture—which focuses on Global Scale, Financial Regulation, Cyber Security, and Modern Engineering (the "Kill the Manual" initiative)—I have added three critical scenarios and refined the approach to reflect their 2026 tech goals.
+V. JPMC-Specific Scenarios & Refinements
+15. Regulatory & Compliance Testing (The "Banking Core")
+•	Question: In a bank, we have strict regulatory requirements (like GDPR, CCPA, or Basel III). How do you ensure automation handles this?
+•	Detailed Answer: "Testing at JPMC isn't just about functionality; it's about Data Sovereignty and Compliance. I ensure our frameworks incorporate 'Privacy by Design.'
+•	Action: I implement Automated Data Masking within our test data management (TDM) pipelines to ensure no PII (Personally Identifiable Information) ever touches a testing environment. I also automate the generation of Audit Logs for every test execution to provide a clear 'Chain of Custody' for regulators.
+•	Result: This reduces the risk of multi-million dollar fines and ensures we are 'Audit Ready' at any given moment without manual preparation."
+16. Engineering for Scale (The "Distributed Systems" Challenge)
+•	Question: JPMC processes trillions of dollars daily. How do you ensure your automation handles high-concurrency systems?
+•	Detailed Answer: "Functional testing is only half the battle. I advocate for Shift-Left Performance Testing.
+•	Action: I integrate tools like k6 or JMeter into the CI/CD pipeline so that every code change is checked for performance regressions under load, not just at the end of the cycle. I also focus on Idempotency—ensuring that if a financial transaction test is retried due to a network glitch, it doesn't result in a double-debit.
+•	Result: This prevents massive system outages during peak market hours and ensures our microservices are resilient and scalable."
+17. Technical Debt & Legacy Systems
+•	Question: JPMC has a mix of modern cloud apps and legacy mainframe systems. How do you manage quality across both?
+•	Detailed Answer: "I use a 'Strangler Pattern' for testing. While we can’t always automate legacy mainframes with modern tools like Playwright, I build API-first wrappers.
+•	Action: We test the modern interface but use 'Service Virtualization' (like WireMock) to simulate the legacy backend responses. This allows us to move fast on the UI/API layer without being slowed down by the slower release cycles of legacy systems.
+•	Result: This allows the business to innovate on the customer-facing side while maintaining 100% stability on the core banking side."
+________________________________________
+Key Refinements for JPMC Managerial Style
+If I could change anything to make your previous answers more "JPMC-ready," I would add these specific nuances:
+1.	Mention "The Firm" over "The Company": JPMC employees often refer to the organization as "The Firm." Using this terminology shows you’ve done your cultural homework.
+2.	Focus on Cybersecurity: JPMC spends nearly $1 billion annually on cybersecurity alone. In your Quality Ownership answer, mention that you work with the SISO (Strategic Information Security Officer) to ensure automated tests include basic security vulnerability scans (DAST/SAST).
+3.	The "Kill the Manual" Initiative: JPMC has a massive internal push to eliminate manual toil. In your ROI of Automation answer, use the phrase "eliminating manual toil" or "driving operational excellence."
+4.	Inclusivity: JPMC is very proud of its Diversity, Equity, and Inclusion (DEI) efforts. In your Mentorship answer, mention how you ensure an inclusive environment where different perspectives (e.g., from different global regions) are heard during sprint planning.
+Bonus: The "Conflict with a VP/Director" Scenario
+•	Question: What if a senior leader (VP) wants to bypass a testing phase to meet a market deadline?
+•	Detailed Answer: "At JPMC, we have a 'Duty to Speak Up.' I would present a Risk-Impact Analysis. I would clearly state, 'If we bypass this, the risk is a potential outage in the payment gateway affecting X thousand users.' I would offer a compromise: 'Let’s run a subset of critical P0 tests and do a Canary Deployment (releasing to 5% of users) to mitigate the risk.' This shows I am a business partner, not just a 'gatekeeper.'"
+
+I. Leadership & Team Management
+1. Mentorship
+•	Question: How do you approach mentoring junior members of your team?
+•	Detailed Answer: "I believe mentorship is about empowering others through structured growth rather than just answering technical questions. I start by identifying their specific skill gaps—for instance, a junior SDET I worked with was struggling with asynchronous Java code and race conditions.
+•	Action: I implemented a 'Shadow and Reverse-Shadow' approach. First, they watched me debug; then, I watched them code, providing real-time feedback. I broke complex framework components into manageable chunks to avoid burnout.
+•	Result: We held twice-weekly pair programming sessions. Within a month, their code quality improved significantly, their PR comments decreased by 60%, and they successfully took ownership of a core module, delivering sprint tasks on time."
+2. Conflict Resolution
+•	Question: How do you handle a situation where a developer or stakeholder disagrees with your findings or technical choices?
+•	Detailed Answer: "I view conflict as a lack of alignment on data or goals. If a developer disputes a bug, I don't make it a 'me vs. them' scenario.
+•	Action: I schedule a brief 'sync' where we review the Requirements Traceability Matrix (RTM) together. I demonstrate the bug in a clean environment and explain the business impact—for example, how a specific failure could impact transaction integrity in a banking app.
+•	Result: By shifting the focus from 'who is right' to 'what is right for the customer,' we reach a consensus quickly. This builds long-term trust between the QA and Dev teams."
+3. Performance
+•	Question: How do you manage an underperforming team member who is missing deadlines?
+•	Detailed Answer: "I take a proactive and empathetic approach. My first step is a private 1-on-1 to identify if the root cause is technical (skill gap), personal, or process-oriented (over-allocation).
+•	Action: If it’s a skill gap, I assign them 'low-stakes' tasks to build confidence and pair them with a buddy. If it's a workload issue, I use tools like Jira velocity charts to help them re-prioritize. I set clear, measurable milestones for the next two weeks.
+•	Result: This usually results in either a turnaround in performance or, if necessary, provides a documented trail for further HR action. Most often, clear expectations and a bit of support bring them back on track."
+4. Change Management
+•	Question: How do you introduce a new tool or process to a resistant team?
+•	Detailed Answer: "Change should be data-driven, not mandated. When I wanted to introduce a new CI/CD pipeline with containerized testing, I didn't force it on everyone at once.
+•	Action: I ran a POC (Proof of Concept) on one small project. I documented the 'Before vs. After'—specifically how we reduced the feedback loop from 4 hours to 15 minutes. I presented this data to the team to show 'what's in it for them.'
+•	Result: Seeing the tangible time savings, the team became advocates for the change. We then held a 'lunch and learn' session to ensure everyone felt comfortable with the new tech stack before a full rollout."
+________________________________________
+II. Testing Strategy & Impact
+5. Risk-Based Testing
+•	Question: In a time-crunched release, how do you decide what to test?
+•	Detailed Answer: "In a high-stakes environment like JP Morgan, we use a Risk-Impact Matrix. I categorize features by Business Criticality (e.g., payment processing) and Technical Complexity (areas with high code churn).
+•	Action: High-risk/High-impact areas get full automated regression and manual exploratory testing. Low-risk areas, like UI styling on internal pages, are moved to a post-release 'sanity' check.
+•	Result: This ensures that even if we can't test 100% of the app, we have 100% coverage of the features that would cause a 'Severity 1' incident if they failed."
+6. ROI of Automation
+•	Question: How do you prove that your automation efforts are actually providing value?
+•	Detailed Answer: "I track three primary KPIs to measure ROI:
+1.	Time-to-Market: How much faster are we releasing since we automated regression?
+2.	Defect Leakage: Are we catching bugs in the automation phase that used to reach production?
+3.	Cost Savings: The reduction in manual man-hours required for each release.
+•	Impact: For example, by automating 70% of a legacy suite, we reduced a 3-day manual regression cycle to 2 hours, allowing the team to focus on higher-value exploratory testing and reducing overall release costs."
+7. Ambiguity
+•	Question: How do you design a test strategy when requirements are vague?
+•	Detailed Answer: "I don't wait for perfect documentation. I start by interviewing the Product Manager to understand the 'User Intent'—what is the user trying to achieve?
+•	Action: I design a Modular Framework. Instead of specific scripts, I build generic 'page objects' or 'actions.' As the UI and requirements solidify, I only have to update the logic in one place.
+•	Result: This 'Shift-Left' approach allows us to have a testing skeleton ready by the time the developer finishes the first build, significantly shortening the dev-to-test cycle."
+8. Quality Ownership
+•	Question: If a bug slips into production, how do you handle it as a leader?
+•	Detailed Answer: "I treat production escapes as a team learning opportunity, not a finger-pointing exercise.
+•	Action: I lead a Post-Mortem/Root Cause Analysis (RCA). Was it a missing test case? A data issue? Or an environment difference? Once identified, we write a regression test specifically for that bug.
+•	Result: We update our 'Definition of Done' to ensure that specific gap is closed. This ensures the same mistake never happens twice and strengthens our CI pipeline."
+________________________________________
+III. Project & Resource Management
+9. Prioritization
+•	Question: You have 10 failing tests and a release in 2 hours. What do you do?
+•	Detailed Answer: "I prioritize based on Transaction Flow. In banking, any failure affecting data integrity, security, or regulatory compliance (e.g., KYC or ledger entries) is a 'blocker.'
+•	Action: I analyze the failures—if 8 of the 10 are due to a common 'Flaky' UI element but the backend is solid, I might bypass those for the release. If 1 failure is in the 'Transfer Funds' module, the release is halted.
+•	Result: This disciplined approach protects the firm from financial and reputational risk."
+10. Resource Allocation
+•	Question: How do you estimate the effort for a new automation project?
+•	Detailed Answer: "I break it down into four phases: Discovery/Setup, Framework Design, Script Development, and Maintenance.
+•	Action: I use historical data from similar projects. I always factor in a 20% 'Maintenance Buffer' because as the product evolves, automation code must be updated.
+•	Result: This leads to realistic timelines that the team can actually meet without burnout, and it manages stakeholder expectations regarding when they will see the first 'green' report."
+11. Cross-functional Collaboration
+•	Question: How do you bridge the gap between QA, Dev, and DevOps?
+•	Detailed Answer: "I advocate for Quality as a Shared Responsibility. I work with DevOps to ensure our tests are integrated into the Jenkins/GitLab pipeline so they run on every 'git push.'
+•	Action: I participate in 'Three Amigos' meetings (Dev, QA, Product) at the start of a feature to ensure everyone understands the 'Definition of Done.'
+•	Result: This eliminates the 'tossing code over the wall' mentality. When a build fails, the Devs check the logs immediately because they know the tests are reliable and part of their own workflow."
+________________________________________
+IV. Career & Culture Fit
+12. Role Understanding
+•	Question: Why Senior SDET and not a Full-stack Developer?
+•	Detailed Answer: "A developer builds the 'what,' but an SDET ensures the 'how' and the 'why.' I enjoy the challenge of Engineering for Quality. Building a scalable automation framework requires the same coding rigor as building the app, but it also requires a strategic mindset to break things and find vulnerabilities. I find it more rewarding to enable a team to move fast without breaking things."
+13. Adaptability
+•	Question: How do you handle sudden shifts in project priority?
+•	Detailed Answer: "In a dynamic environment like JPMC, priorities change due to market shifts or regulations. I remain calm and focus on Re-baselining. I immediately regroup with stakeholders to understand the new 'High-Value' target. I then pivot my team’s focus, pausing low-priority automation and moving resources to support the new direction without losing momentum."
+14. Self-Improvement
+•	Question: How do you stay technically relevant?
+•	Detailed Answer: "I actively contribute to the QA community. Lately, I've been focusing on AI in Testing, specifically how we can use LLMs to generate smarter test data and self-healing locators. I also follow JPMC's tech blogs and open-source contributions to ensure my strategy aligns with the firm's direction toward cloud-native architectures."
+
+
+	1. Unmatched Technological Investment
+•	Scale of Innovation: JPMC invests approximately $18 billion annually in technology. As a Senior SDET, you aren't just maintaining scripts; you are part of one of the world's largest tech-driven companies, building solutions that move $10 trillion daily.
+•	AI-First Strategy: For 2026, JPMC has identified Artificial Intelligence as a primary force for operational efficiency. You will have the opportunity to implement AI-driven testing—such as self-healing automation and predictive analytics—at a scale few other firms can offer. 
+JPMorgan Chase +5
+2. Engineering Excellence & Modern Stack
+•	Shift-Left & DevOps Culture: The firm is heavily focused on "Shift-Left" testing and integrating quality into the initial stages of development. Your role will involve high-level system design, application resiliency, and advanced CI/CD methods.
+•	Cloud-Native Transition: With 2026 requirements emphasizing Cloud-Native experience and API hosting, you will work on migrating and testing complex financial architectures on modern cloud platforms. 
+Oracle +1
+3. Stability and "Firm-First" Culture
+•	Global Career Growth: JPMC operates in over 100 countries and employs more than 50,000 technologists. This provides a stable, long-term career path with opportunities for internal mobility across various lines of business (e.g., Asset Management, Payments, or Consumer Banking).
+•	Inclusive Environment: The firm places a high priority on a diverse and inclusive workplace, valuing different perspectives in its 21 Global Technology Centers. 
+JPMorganChase +3
+4. Impact on the Global Economy
+•	High-Stakes Responsibility: Your work directly impacts the financial security of 84 million customers and the stability of the global economy. For a Senior SDET, this means the quality standards you set have real-world consequences, providing a level of professional fulfillment that is rare in smaller tech firms. 
+JPMorgan Chase
+
+
+"I want to join J.P. Morgan because it represents the pinnacle of engineering at scale. With the firm’s $18 billion annual investment in technology and its 2026 focus on Agentic AI and cloud-native infrastructure, I see a unique opportunity to build automation frameworks that are not just functional, but predictive and resilient. I am drawn to the 'Firm-First' culture that prioritizes operational excellence and cybersecurity, and I am excited to contribute to a platform that powers the global economy while continuing my own growth in a world-class engineering environment.
+	. Core Lines of Business (LOBs)
+JPMC operates through four primary segments, each with distinct technical and regulatory testing needs: 
+Investopedia +1
+•	Consumer & Community Banking (CCB): Focuses on "Omnichannel Consistency". For a Senior SDET, this means testing seamless transitions between mobile, web, and branch journeys for 84 million customers.
+•	Commercial & Investment Bank (CIB): Operates at an unprecedented scale, moving $10 trillion daily. Key concepts include Prime Services, Securities Services, and Global Corporate Banking.
+•	Asset & Wealth Management (AWM): Manages global portfolios with a 2026 focus on "AI-driven productivity" and resilient portfolio construction.
+•	Payments: A massive vertical processing over $10 trillion in daily payments with a 28% global SWIFT market share. 
+
+1. Consumer & Community Banking (CCB)
+This is "Retail Banking"—the part of the bank that interacts with everyday people and small businesses.
+•	What they do: Manage savings/current accounts, credit cards, home mortgages, and auto loans.
+•	The 2026 Focus (Omnichannel): In 2026, CCB aims for a "seamless journey." If you start a loan application on your Mobile App, it should show up instantly when you walk into a physical Branch, and a phone representative should see the exact same data in real-time.
+•	Key Products: Debit/Credit cards, ATMs, Personal Loans, Small Business Banking.
+2. Commercial & Investment Bank (CIB)
+This is the "Wholesale" side of the bank. It deals with massive corporations, governments, and institutional investors.
+•	Commercial Banking: Provides loans and cash management for mid-to-large-sized companies (e.g., a factory needing $100M for a new plant).
+•	Investment Banking: Helps companies raise money by issuing stocks (IPOs) or bonds, and advises on Mergers & Acquisitions (M&A).
+•	Markets & Securities: Trading stocks, bonds, and currencies. Moving $10 trillion daily means they are the "plumbing" of the global economy.
+•	Prime Services: Providing specialized services (like lending and execution) to Hedge Funds.
+3. Asset & Wealth Management (AWM)
+This division focuses on investing money to make it grow over the long term for wealthy individuals and large institutions (like pension funds).
+•	Wealth Management: Helping "High Net Worth" individuals (the ultra-rich) manage their personal estates, taxes, and inheritance.
+•	Asset Management: Managing massive "mutual funds" or "pension funds."
+•	2026 Focus (AI-Driven): Using AI to predict market trends and build "resilient portfolios" that don't crash during economic downturns. It’s about precision and advice rather than just transaction volume.
+4. Payments (The Global Engine)
+In 2026, Payments is often its own massive vertical because it sits underneath all the other divisions.
+•	What it does: It is the "software and hardware" that moves money from Point A to Point B across the world.
+•	Scale: Handling 28% of global SWIFT traffic means nearly 1 out of every 3 international bank transfers touches this system.
+•	Merchant Services: Providing the technology for stores (like Amazon or a local cafe) to accept payments from customers.
+•	Treasury Services: Helping huge companies manage their cash across 100+ different countries and currencies.
+________________________________________
+
+JPMorgan Chase +4
+2. Technical Core Banking Concepts
+JPMC’s "Next Happens Now" philosophy drives several key 2026 technical themes: 
+JPMorgan Chase
+•	Microservices Revolution: Shifting from monolithic "Core Banking Systems" (CBS) to independent modules for lending, treasury, and payments.
+•	Straight-Through Processing (STP): The goal of end-to-end processing without human intervention. Managerial SDETs must ensure automation catches errors that could lead to massive financial de-syncs.
+•	Real-Time General Ledger: Moving away from end-of-day batch processing to instant liquidity visibility.
+•	Omnichannel Payments: Full-stack solutions featuring Biometric Payments and proprietary terminals unveiled for the 2026 retail market. 
+J.P. Morgan +1
+3. Risk, Regulation & Governance
+In a banking environment, testing is synonymous with risk management: 
+JPMorganChase
+•	KYC and AML Automation: Using AI and OCR to automate up to 92% of compliance decisions, reducing account opening times from days to minutes.
+•	Cybersecurity & Resiliency: A proactive heartbeat of the firm. SDETs must test "Application Resiliency" to ensure no downtime in the global capital flow.
+•	World-Class Controls: "Good compliance is good business". Testing strategies must be as robust as the business themselves, incorporating audit-ready automated reporting. 
+JPMorganChase +3
+4. 2026 Strategic Drivers
+•	AI Supercycle: JPMC estimates an AI supercycle driving above-trend earnings growth. SDETs are expected to leverage AI for "Hyper-Automation" toward Zero-Ops.
+•	The "Six Ds": Analysts track Deficits, Deregulation, De-population, De-carbonization, De-globalization, and De-dollarization as forces shaping the 2026 outlook.
+•	Fragmentation vs. Globalization: Shifting from seamless globalization to a landscape defined by trade barriers and national security
+
+
